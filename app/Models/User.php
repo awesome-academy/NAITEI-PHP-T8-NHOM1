@@ -9,6 +9,9 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Hash;
+
 
 class User extends Authenticatable
 {
@@ -19,10 +22,12 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
@@ -40,9 +45,10 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+    
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password' => 'hashed', 
     ];
 
     public function role(): BelongsTo
@@ -52,7 +58,7 @@ class User extends Authenticatable
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class, 'user_id');
+        return $this->hasMany(Order::class, 'customer_id');
     }
 
     public function feedbacks(): HasMany
@@ -68,6 +74,11 @@ class User extends Authenticatable
     public function manageProducts(): HasMany
     {
         return $this->hasMany(ManageProduct::class, 'user_id');
+    }
+
+    public function statusOrders(): HasMany
+    {
+        return $this->hasMany(StatusOrder::class, 'admin_id');
     }
 
 }
