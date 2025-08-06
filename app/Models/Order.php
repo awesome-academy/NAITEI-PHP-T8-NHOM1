@@ -13,7 +13,7 @@ class Order extends Model
 
     protected $primaryKey = 'order_id';
 
-    protected $fillable = ['user_id', 'order_date', 'total_amount'];
+    protected $fillable = ['user_id', 'order_date', 'total_cost'];
 
     public function user(): BelongsTo
     {
@@ -23,5 +23,9 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'order_id');
+    }
+    public function statusOrders(): HasMany
+    {
+        return $this->hasMany(StatusOrder::class, 'order_id');
     }
 }
