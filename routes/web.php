@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,6 +33,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Customer routes - require authentication
+Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
+    Route::get('/categories', [CustomerController::class, 'categories'])->name('categories');
+    Route::get('/products/{category}', [CustomerController::class, 'products'])->name('products');
 });
 
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
