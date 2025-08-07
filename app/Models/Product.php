@@ -11,12 +11,18 @@ class Product extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'product_id';
+    
     protected $fillable = ['name', 'description', 'price', 'category_id'];
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'category_id');
-    }
+        return $this->belongsTo(Category::class, 'category_id', 'category_id');
+        /* $this->belongsTo(Model::class, 'foreign_key', 'owner_key') -> 
+            'foreign_key' - 'category_id' in this case is the foreign key in the products table,
+            in the other hand, 'owner_key' - 'category_id' is the primary key in the categories table.
+        */
+        }
 
     public function orderItems(): HasMany
     {
