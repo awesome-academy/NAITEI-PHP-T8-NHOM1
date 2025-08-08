@@ -4,36 +4,36 @@
 <div class="content-section active">
     <div class="table-container">
         <div class="table-header">
-            <h2 class="table-title">Products Management</h2>
+            <h2 class="table-title">{{ __('Products Management') }}</h2>
             <button class="btn btn-primary" data-modal="productModal" type="button">
-                <i class="fas fa-plus"></i> Add Product
+                <i class="fas fa-plus"></i> {{ __('Add Product') }}
             </button>
         </div>
         <div style="padding: 20px;">
             <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search products...">
+                <input type="text" class="search-input" placeholder="{{ __('Search products...') }}">
                 <select class="form-control" style="width: auto;">
-                    <option>All Categories</option>
+                    <option>{{ __('All Categories') }}</option>
                     @foreach($products->pluck('category')->unique() as $category)
                         @if($category)
-                            <option>{{ $category->name }}</option>
+                            <option>{{ __($category->name) }}</option>
                         @endif
                     @endforeach
                 </select>
                 <button class="btn btn-secondary">
-                    <i class="fas fa-search"></i> Search
+                    <i class="fas fa-search"></i> {{ __('Search') }}
                 </button>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Image</th>
-                        <th>Product Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Description</th>
-                        <th>Actions</th>
+                        <th>{{ __('ID') }}</th>
+                        <th>{{ __('Image') }}</th>
+                        <th>{{ __('Product Name') }}</th>
+                        <th>{{ __('Category') }}</th>
+                        <th>{{ __('Price') }}</th>
+                        <th>{{ __('Description') }}</th>
+                        <th>{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +50,7 @@
                             </div>
                         </td>
                         <td>{{ $product->name }}</td>
-                        <td>{{ $product->category->name ?? 'N/A' }}</td>
+                        <td>{{ __($product->category->name) ?? __('N/A') }}</td>
                         <td>{{ number_format($product->price) }} VNĐ</td>
                         <td>{{ Str::limit($product->description, 50) }}</td>
                         <td>
@@ -64,7 +64,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="text-align: center;">No products found</td>
+                        <td colspan="7" style="text-align: center;">{{ __('No products found') }}</td>
                     </tr>
                     @endforelse
                 </tbody>

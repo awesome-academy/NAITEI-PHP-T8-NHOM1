@@ -36,42 +36,42 @@ class OrderSeeder extends Seeder
 
         $adminUser = User::where('role_id', 1)->first();
         if (!$adminUser) {
-            $adminUser = User::first(); // fallback to any user
+            $adminUser = User::first(); 
         }
 
         $ordersData = [
             [
-                'user_id' => $user->id,
+                'customer_id' => $user->id,
                 'order_date' => '2025-08-05',
-                'total_amount' => 12500000.00
+                'total_cost' => 12500000.00
             ],
             [
-                'user_id' => $user->id,
+                'customer_id' => $user->id,
                 'order_date' => '2025-08-04',
-                'total_amount' => 8900000.00
+                'total_cost' => 8900000.00
             ],
             [
-                'user_id' => $user->id,
+                'customer_id' => $user->id,
                 'order_date' => '2025-08-03',
-                'total_amount' => 6200000.00
+                'total_cost' => 6200000.00
             ],
             [
-                'user_id' => $user->id,
+                'customer_id' => $user->id,
                 'order_date' => '2025-08-06',
-                'total_amount' => 15300000.00
+                'total_cost' => 15300000.00
             ],
             [
-                'user_id' => $user->id,
+                'customer_id' => $user->id,
                 'order_date' => '2025-08-02',
-                'total_amount' => 9600000.00
+                'total_cost' => 9600000.00
             ]
         ];
 
         foreach ($ordersData as $orderData) {
             $order = Order::create([
-                'user_id' => $orderData['user_id'],
+                'customer_id' => $orderData['customer_id'],
                 'order_date' => $orderData['order_date'],
-                'total_amount' => $orderData['total_amount']
+                'total_cost' => $orderData['total_cost']
             ]);
 
             StatusOrder::create([

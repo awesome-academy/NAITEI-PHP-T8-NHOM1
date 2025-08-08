@@ -146,6 +146,8 @@ class AdminPanel {
 // Language selector function
 function selectLanguage(lang) {
     console.log('Language selected:', lang);
+
+    window.location.href = `/language/${lang}`;
 }
 
 // Global functions for compatibility

@@ -4,10 +4,11 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\App;
 
-class AdminMiddleware
+class Localization
 {
     /**
      * Handle an incoming request.
@@ -16,16 +17,9 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check login status
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        // Check if user has role_id = 1 (admin)
-        $user = Auth::user();
-        if (!$user || $user->role_id !== 1) {
-            // If not admin, return 403 
-            abort(403, 'You do not have permission to access this page.');
+        // check if the session has a language set, if is it => set the locale
+        if (Session::get('lang')) {
+            App::setLocale(Session::get('lang'));
         }
 
         return $next($request);
