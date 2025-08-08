@@ -5,11 +5,11 @@
 @section('hero')
 <section class="hero-section">
     <div class="hero-content">
-        <h1>Shop</h1>
+        <h1>{{ __('Shop') }}</h1>
         <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">Home</a>
+            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
             <i class="fas fa-chevron-right"></i>
-            <span>Shop</span>
+            <span>{{ __('Shop') }}</span>
         </div>
     </div>
 </section>
@@ -21,7 +21,7 @@
     <div class="filter-left">
         <button class="filter-btn">
             <i class="fas fa-filter"></i>
-            Filter
+            {{ __('Filter') }}
         </button>
         
         <div class="view-options">
@@ -35,24 +35,22 @@
     </div>
     
     <div class="filter-right">
-        <span class="showing-text">
-            Showing {{ $categories->firstItem() }}-{{ $categories->lastItem() }} of {{ $categories->total() }} categories
-        </span>
+        <span class="showing-text">{{ __('Showing') }} 1-{{ $categories->count() }} {{ __('of') }} {{ $categories->count() }} {{ __('categories') }}</span>
         
         <div style="display: flex; gap: 15px; align-items: center;">
-            <label>Show</label>
+            <label>{{ __('Show') }}</label>
             <select class="show-select">
                 <option>16</option>
                 <option>32</option>
                 <option>48</option>
             </select>
             
-            <label>Sort by</label>
+            <label>{{ __('Sort by') }}</label>
             <select class="sort-select">
-                <option>Default</option>
-                <option>Name A-Z</option>
-                <option>Name Z-A</option>
-                <option>Products Count</option>
+                <option>{{ __('Default') }}</option>
+                <option>{{ __('Name A-Z') }}</option>
+                <option>{{ __('Name Z-A') }}</option>
+                <option>{{ __('Products Count') }}</option>
             </select>
         </div>
     </div>
@@ -66,19 +64,19 @@
             <img src="{{ $category->image ?? '/images/default-category.svg' }}" alt="{{ $category->name }}">
             <div class="category-overlay">
                 <a href="{{ route('customer.products', $category->category_id) }}" class="view-products-btn">
-                    View Products
+                    {{ __('View Products') }}
                 </a>
             </div>
         </div>
         <div class="category-info">
             <h3>{{ $category->name }}</h3>
             <p class="category-desc">{{ $category->description }}</p>
-            <p class="products-count">{{ $category->products_count }} products</p>
+            <p class="products-count">{{ $category->products_count }} {{ __('products') }}</p>
         </div>
     </div>
     @empty
     <div class="no-categories">
-        <p>No categories available at the moment.</p>
+        <p>{{ __('No categories available at the moment.') }}</p>
     </div>
     @endforelse
 </div>

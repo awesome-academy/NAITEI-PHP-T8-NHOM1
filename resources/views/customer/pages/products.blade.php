@@ -7,9 +7,9 @@
     <div class="hero-content">
         <h1>{{ $category->name }}</h1>
         <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">Home</a>
+            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
             <i class="fas fa-chevron-right"></i>
-            <a href="{{ route('customer.categories') }}">Shop</a>
+            <a href="{{ route('customer.categories') }}">{{ __('Shop') }}</a>
             <i class="fas fa-chevron-right"></i>
             <span>{{ $category->name }}</span>
         </div>
@@ -23,7 +23,7 @@
     <div class="filter-left">
         <button class="filter-btn">
             <i class="fas fa-filter"></i>
-            Filter
+            {{ __('Filter') }}
         </button>
         
         <div class="view-options">
@@ -37,23 +37,23 @@
     </div>
     
     <div class="filter-right">
-        <span class="showing-text">Showing 1-{{ $products->count() }} of {{ $products->count() }} products</span>
+        <span class="showing-text">{{ __('Showing') }} 1-{{ $products->count() }} {{ __('of') }} {{ $products->count() }} {{ __('products') }}</span>
         
         <div style="display: flex; gap: 15px; align-items: center;">
-            <label>Show</label>
+            <label>{{ __('Show') }}</label>
             <select class="show-select">
                 <option>16</option>
                 <option>32</option>
                 <option>48</option>
             </select>
             
-            <label>Sort by</label>
+            <label>{{ __('Sort by') }}</label>
             <select class="sort-select">
-                <option>Default</option>
-                <option>Price Low-High</option>
-                <option>Price High-Low</option>
-                <option>Name A-Z</option>
-                <option>Name Z-A</option>
+                <option>{{ __('Default') }}</option>
+                <option>{{ __('Price Low-High') }}</option>
+                <option>{{ __('Price High-Low') }}</option>
+                <option>{{ __('Name A-Z') }}</option>
+                <option>{{ __('Name Z-A') }}</option>
             </select>
         </div>
     </div>
@@ -75,19 +75,19 @@
             @endif
             
             <div class="product-overlay">
-                <button class="add-to-cart-btn">Add to cart</button>
+                <button class="add-to-cart-btn">{{ __('Add to cart') }}</button>
                 <div class="product-actions">
                     <button class="action-btn">
                         <i class="fas fa-share-alt"></i>
-                        Share
+                        {{ __('Share') }}
                     </button>
                     <button class="action-btn">
                         <i class="fas fa-random"></i>
-                        Compare
+                        {{ __('Compare') }}
                     </button>
                     <button class="action-btn">
                         <i class="fas fa-heart"></i>
-                        Like
+                        {{ __('Like') }}
                     </button>
                 </div>
             </div>
@@ -97,17 +97,17 @@
             <h3>{{ $product->name }}</h3>
             <p class="product-desc">{{ $product->description }}</p>
             <div class="product-price">
-                @if(isset($product->original_price) && $product->original_price > $product->price)
-                    <span class="original-price">{{ number_format($product->original_price, 0, '.', ',') }} VND</span>
-                    <span class="original-price">{{ number_format($product->price * 1.3, 0, '.', ',') }} VND</span>
+                <span class="current-price">{{ number_format($product->price, 0, '.', ',') }} {{ __('VND') }}</span>
+                @if($loop->index % 3 == 0)
+                    <span class="original-price">{{ number_format($product->price * 1.3, 0, '.', ',') }} {{ __('VND') }}</span>
                 @endif
             </div>
         </div>
     </div>
     @empty
     <div class="no-products">
-        <p>No products available in this category.</p>
-        <a href="{{ route('customer.categories') }}" class="back-btn">Back to Categories</a>
+        <p>{{ __('No products available in this category.') }}</p>
+        <a href="{{ route('customer.categories') }}" class="back-btn">{{ __('Back to Categories') }}</a>
     </div>
     @endforelse
 </div>

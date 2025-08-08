@@ -3,10 +3,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
             <div>
                 <h3 style="color: #B88E2F; font-size: 24px; font-weight: 700; margin-bottom: 10px;">Furniro</h3>
-                <p style="color: #666;">Premium furniture for your home</p>
+                <p style="color: #666;">{{ __('Premium furniture for your home') }}</p>
             </div>
             <div style="color: #666;">
-                <p>&copy; 2024 Furniro. All rights reserved.</p>
+                <p>&copy; 2024 Furniro. {{ __('All rights reserved') }}.</p>
             </div>
         </div>
     </div>
