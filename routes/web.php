@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LanguageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,11 +20,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
-// Admin login form
-Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminController::class, 'login']);
-Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -51,5 +47,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('feedbacks');
 });
+
+Route::get('language/{lang}', [LanguageController::class, 'changeLanguage'])->name('locale');
 
 require __DIR__.'/auth.php';

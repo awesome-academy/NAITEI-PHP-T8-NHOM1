@@ -13,7 +13,7 @@ class CustomerController extends Controller
      */
     public function categories()
     {
-        $categories = Category::withCount('products')->get();
+        $categories = Category::withCount('products')->paginate(10);
         
         return view('customer.pages.categories', compact('categories'));
     }

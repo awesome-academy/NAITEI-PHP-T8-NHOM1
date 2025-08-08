@@ -13,11 +13,11 @@ class Order extends Model
 
     protected $primaryKey = 'order_id';
 
-    protected $fillable = ['user_id', 'order_date', 'total_amount'];
+    protected $fillable = ['customer_id', 'order_date', 'total_cost'];
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     public function orderItems(): HasMany
