@@ -23,4 +23,15 @@ class Category extends Model
     {
         return $this->hasMany(ManageCategory::class, 'category_id');
     }
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    // This method is used to define how the model should be referenced in routes
+    // It allows you to use the 'category_id' instead of the default 'id'
+    public function getRouteKeyName()
+    {
+        return 'category_id';
+    }
 }
