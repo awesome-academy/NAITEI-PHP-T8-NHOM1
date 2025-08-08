@@ -25,5 +25,7 @@
         @yield('modals')
         @include('admin.components.modals')
     </div>
+
+    @yield('scripts')
 </body>
 </html>

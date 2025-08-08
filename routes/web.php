@@ -43,6 +43,9 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/dashboard/stats', [AdminController::class, 'dashboardStats'])->name('dashboard.stats');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/categories', [AdminController::class, 'categories'])->name('categories');
+    Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
+    Route::put('/categories/{category}', [AdminController::class, 'updateCategory'])->name('categories.update');
+    Route::delete('/categories/{category}', [AdminController::class, 'deleteCategory'])->name('categories.delete');
     Route::get('/products', [AdminController::class, 'products'])->name('products');
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('feedbacks');

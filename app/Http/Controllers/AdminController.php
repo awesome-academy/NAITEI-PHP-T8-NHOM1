@@ -8,9 +8,16 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Feedback;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
+use Illuminate\Validation\Rule;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 
 class AdminController extends Controller
 {
+    private const CATEGORY_IMAGE_DIR = 'images/categories';
+
     public function dashboard()
     {
         $stats = [
@@ -50,6 +57,78 @@ class AdminController extends Controller
         // count products in each category
         $categories = Category::withCount('products')->get();
         return view('admin.pages.categories', compact('categories'));
+    }
+
+    public function storeCategory(StoreCategoryRequest $request)
+    {
+        // $request->validate([
+        //     'name' => 'required|string|max:255|unique:categories,name',
+        //     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        // ]);
+
+        $validated = $request->validated();
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            // $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'svg'];
+            $extension = $image->guessExtension();
+            if (!in_array($extension, $allowedExtensions)) {
+                return redirect()->back()->withErrors(['image' => 'Invalid image extension.']);
+            }
+            $imageName = Str::uuid() . '.' . $extension;
+            $image->move(public_path(self::CATEGORY_IMAGE_DIR), $imageName);
+            $imagePath = self::CATEGORY_IMAGE_DIR . '/' . $imageName;
+            $validated['image'] = $imagePath; 
+            
+        }
+
+        Category::create($validated);
+
+        return redirect()->route('admin.categories')->with('success', 'Category added successfully.');
+    }
+
+    public function updateCategory(UpdateCategoryRequest $request, Category $category)
+    {
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            // Xóa image cũ nếu có
+            if ($category->image && File::exists(public_path($category->image))) {
+                File::delete(public_path($category->image));
+            }
+            
+            $image = $request->file('image');
+            // $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $imageName = Str::uuid() . '.' . $image->extension();
+            $image->move(public_path(self::CATEGORY_IMAGE_DIR), $imageName);
+            $validated['image'] = self::CATEGORY_IMAGE_DIR . '/' . $imageName;
+        }
+
+        $category->update($validated);
+        return redirect()->route('admin.categories')->with('success', 'Category updated.');
+    }
+
+    public function deleteCategory(Category $category)
+    {
+        // Prevent deletion if category has associated products
+        if ($category->products()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete category with associated products.'
+            ], 400);
+        }
+        // Xóa image file nếu có
+        if ($category->image) {
+            // Nếu dùng public/images/categories/
+            if (File::exists(public_path($category->image))) {
+                File::delete(public_path($category->image));
+            }
+        }
+        
+        $category->delete();
+        return response()->json(['success' => true]);
     }
 
     public function products()
