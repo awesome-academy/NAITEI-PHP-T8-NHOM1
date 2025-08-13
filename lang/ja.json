@@ -329,6 +329,9 @@
     "Books": "本",
     "Home & Garden": "ホーム＆ガーデン",
     "Sports": "スポーツ",
+    "Bathroom": "バスルーム",
+    "Outdoor": "アウトドア",
+    "Storage": "ストレージ",
     "admin": "管理者",
     "user": "ユーザー",
     "Shop": "ショップ",
@@ -398,5 +401,8 @@
     "Free shipping on orders over 1,000,000 VND": "1,000,000 VND以上のご注文で送料無料",
     "30-day return policy for your peace of mind": "安心の30日間返品ポリシー",
     "Professional assembly service available": "プロの組み立てサービス利用可能",
-    "2-year warranty on all furniture items": "すべての家具アイテムに2年保証"
+    "2-year warranty on all furniture items": "すべての家具アイテムに2年保証",
+    "Stock": "在庫",
+    "Available": "利用可能",
+    "Out of Stock": "在庫切れ"
 }

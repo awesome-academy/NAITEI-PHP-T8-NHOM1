@@ -53,6 +53,11 @@
                     @endforelse
                 </tbody>
             </table>
+            
+            <!-- Pagination -->
+            <div style="margin-top: 20px; display: flex; justify-content: center;">
+                {{ $users->links('pagination.pagination') }}
+            </div>
         </div>
     </div>
 </div>
