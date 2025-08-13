@@ -5,34 +5,33 @@
             <h3>{{ __('Add New User') }}</h3>
             <button class="modal-close" onclick="adminPanel.closeModal('userModal')">&times;</button>
         </div>
-        <form>
+        <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">{{ __('Username') }}</label>
-                    <input type="text" class="form-control" required>
+                    <input type="text" name="name" class="form-control" required>
                 </div>
+            </div>
+            <div class="form-row">    
                 <div class="form-group">
                     <label class="form-label">{{ __('Email') }}</label>
-                    <input type="email" class="form-control" required>
+                    <input type="email" name="email" class="form-control" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">{{ __('Full Name') }}</label>
-                    <input type="text" class="form-control" required>
-                </div>
-                <div class="form-group">
                     <label class="form-label">{{ __('Role') }}</label>
-                    <select class="form-control" required>
+                    <select name="role_id" class="form-control" required>
                         <option value="">{{ __('Select Role') }}</option>
-                        <option value="customer">{{ __('Customer') }}</option>
-                        <option value="admin">{{ __('Admin') }}</option>
+                        <option value="2">{{ __('Customer') }}</option>
+                        <option value="1">{{ __('Admin') }}</option>
                     </select>
                 </div>
             </div>
             <div class="form-group">
                 <label class="form-label">{{ __('Password') }}</label>
-                <input type="password" class="form-control" required>
+                <input type="password" name="password" class="form-control" required>
             </div>
             <div style="text-align: right; margin-top: 25px;">
                 <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('userModal')">{{ __('Cancel') }}</button>
@@ -42,8 +41,59 @@
     </div>
 </div>
 
+<!-- Edit User Modal -->
+<div class="modal" id="editUserModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Edit User') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('editUserModal')">&times;</button>
+        </div>
+        <form id="editUserForm" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="user_id" id="edit_user_id">
+            <div class="form-group">
+                <label class="form-label" for="edit_user_name">{{ __('Username') }}</label>
+                <input type="text" class="form-control" name="name" id="edit_user_name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit_user_email">{{ __('Email') }}</label>
+                <input type="email" class="form-control" name="email" id="edit_user_email" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit_user_role">{{ __('Role') }}</label>
+                <select class="form-control" name="role_id" id="edit_user_role" required>
+                    <option value="">{{ __('Select Role') }}</option>
+                    <option value="2">{{ __('Customer') }}</option>
+                    <option value="1">{{ __('Admin') }}</option>
+                </select>
+            </div>
+            <div style="text-align: right; margin-top: 25px;">
+                <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('editUserModal')">{{ __('Cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ __('Update User') }} </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Delete User Modal -->
+<div class="modal" id="deleteUserModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Delete User') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('deleteUserModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>{{ __('Are you sure you want to delete this user? This action cannot be undone.') }}</p>
+        </div>
+        <div style="text-align: right; margin-top: 25px;">
+            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">{{ __('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">{{ __('Delete') }}</button>
+        </div>
+    </div>
+</div>
+
 <!-- Category Modal -->
-<div class="modal" id="categoryModal">
+<div class="modal" id="categoryModal">                                                                                                                                                                  
     <div class="modal-content">
         <div class="modal-header">
             <h3>{{ __('Add New Category') }}</h3>
@@ -53,7 +103,7 @@
             @csrf
             <div class="form-group">
                 <label class="form-label">Category Name</label>
-                <input type="text" name="name" class="form-control" required>
+                <input type="text" name="name" class="form-control" required>                                                                                                                                                                                                                                               
             </div>
 
             <div class="form-group">
@@ -91,7 +141,7 @@
             <div class="form-group">
                 <label class="form-label">Image</label>
                 <input type="file" id="edit_category_image" class="form-control" name="image">
-                <!-- <img id="edit_category_preview" src="" alt="Preview" style="max-width: 100px; margin-top: 10px;"> -->
+                <!-- <img id="edit_category_preview" src="" alt="Pr                                                                                                                                                             eview" style="max-width: 100px; margin-top: 10px;"> -->
             </div>
             <div style="text-align: right; margin-top: 25px;">
                 <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('editCategoryModal')">Cancel</button>
