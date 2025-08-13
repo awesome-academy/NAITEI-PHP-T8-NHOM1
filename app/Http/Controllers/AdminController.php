@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
@@ -15,6 +16,8 @@ use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class AdminController extends Controller
 {
@@ -52,7 +55,76 @@ class AdminController extends Controller
     public function users()
     {
         $users = User::paginate(10);
-        return view('admin.pages.users', compact('users'));
+        $roles = Role::all(); // Lấy tất cả roles để tạo filter dropdown
+        return view('admin.pages.users', compact('users', 'roles'));
+    }
+
+    public function storeUser(StoreUserRequest $request)
+    {
+        $validated = $request->validated();
+        
+        if (isset($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        }
+        User::create($validated);
+        return redirect()->route('admin.users')->with('success', 'User created successfully.');
+    }
+
+    public function updateUser(UpdateUserRequest $request, User $user)
+    {
+        $validated = $request->validated();
+
+        if ($request->filled('password')) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']); // bỏ qua nếu không cập nhật password
+        }
+
+        $user->update($validated);
+        return redirect()->route('admin.users')->with('success', 'User updated successfully.');
+    }
+
+    public function deleteUser(User $user)
+    {
+        // Prevent deletion of current logged in user
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete your own account.'
+            ], 403);
+        }
+
+        $user->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $query = $request->input('query');
+        $roleId = $request->input('role_id');
+        
+        $usersQuery = User::with('role');
+        
+        // search filter (name hoặc email)
+        if (!empty($query)) {
+            $usersQuery->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                ->orWhere('email', 'like', "%{$query}%");
+            });
+        }
+        
+        // role filter  
+        if (!empty($roleId) && $roleId !== 'all') {
+            $usersQuery->where('role_id', $roleId);
+        }
+        
+        $users = $usersQuery->paginate(10);
+        $roles = Role::all(); // Lấy tất cả roles để tạo filter dropdown
+        
+        // ensure that search parameters are kept in pagination links
+        $users->appends($request->only(['query', 'role_id']));
+        
+        return view('admin.pages.users', compact('users', 'roles'));
     }
 
     public function categories()
