@@ -1,12 +1,17 @@
 {
   "resources/css/admin.css": {
-    "file": "assets/admin-DIZfY5LE.css",
+    "file": "assets/admin-0xxR4S8n.css",
     "src": "resources/css/admin.css",
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-Ex0Nf341.css",
+    "file": "assets/app-D0r3B96y.css",
     "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/pagination.css": {
+    "file": "assets/pagination-BJxL7ZTj.css",
+    "src": "resources/css/pagination.css",
     "isEntry": true
   },
   "resources/js/admin.js": {

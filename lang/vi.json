@@ -327,6 +327,9 @@
     "Books": "Sách",
     "Home & Garden": "Nhà & Vườn",
     "Sports": "Thể Thao",
+    "Bathroom": "Phòng Tắm",
+    "Outdoor": "Ngoài Trời",
+    "Storage": "Kho Lưu Trữ",
     "admin": "quản trị viên",
     "user": "khách hàng",
     "Shop": "Cửa hàng",
@@ -396,5 +399,9 @@
     "Free shipping on orders over 1,000,000 VND": "Miễn phí vận chuyển cho đơn hàng trên 1,000,000 VNĐ",
     "30-day return policy for your peace of mind": "Chính sách đổi trả 30 ngày để bạn yên tâm",
     "Professional assembly service available": "Có sẵn dịch vụ lắp đặt chuyên nghiệp",
-    "2-year warranty on all furniture items": "Bảo hành 2 năm cho tất cả sản phẩm nội thất"
+    "2-year warranty on all furniture items": "Bảo hành 2 năm cho tất cả sản phẩm nội thất",
+    "Stock": "Tồn Kho",
+    "Available": "Có Sẵn",
+    "Out of Stock": "Hết Hàng",
+    "Feedbacks": "Phản Hồi Khách Hàng"
 }

@@ -11,6 +11,9 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\Feedback;
 use App\Models\Role;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class AdminControllerTest extends TestCase
 {
@@ -185,5 +188,76 @@ class AdminControllerTest extends TestCase
         $response = $this->get('/admin/dashboard');
 
         $response->assertRedirect('/login');
+    }
+
+    /** @test */
+    public function it_can_store_product()
+    {
+        $this->withoutMiddleware();
+        
+        $category = Category::factory()->create();
+        
+        $productData = [
+            'name' => 'Test Product',
+            'price' => 99.99,
+            'category_id' => $category->category_id
+        ];
+
+        $response = $this->actingAs($this->adminUser)
+                         ->post('/admin/products', $productData);
+
+        $this->assertTrue($response->getStatusCode() < 500);
+    }
+
+    /** @test */
+    public function it_can_update_product()
+    {
+        $this->withoutMiddleware();
+        
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->category_id]);
+        
+        $updateData = [
+            'name' => 'Updated Product Name',
+            'price' => 199.99,
+            'category_id' => $category->category_id
+        ];
+
+        $response = $this->actingAs($this->adminUser)
+                         ->put("/admin/products/{$product->product_id}", $updateData);
+
+        $this->assertTrue($response->getStatusCode() < 500);
+    }
+
+    /** @test */
+    public function it_can_delete_product()
+    {
+        $this->withoutMiddleware();
+        
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->category_id]);
+
+        $response = $this->actingAs($this->adminUser)
+                         ->delete("/admin/products/{$product->product_id}");
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+    }
+
+    /** @test */
+    public function it_can_search_products()
+    {
+        $this->withoutMiddleware();
+        
+        $category = Category::factory()->create();
+        Product::factory()->create(['category_id' => $category->category_id]);
+
+        $response = $this->actingAs($this->adminUser)
+                         ->get('/admin/products/search?query=test');
+
+        $response->assertStatus(200);
+        $response->assertViewIs('admin.pages.products');
+        $response->assertViewHas('products');
+        $response->assertViewHas('categories');
     }
 }

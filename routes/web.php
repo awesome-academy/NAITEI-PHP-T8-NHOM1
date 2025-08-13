@@ -49,6 +49,10 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::put('/categories/{category}', [AdminController::class, 'updateCategory'])->name('categories.update');
     Route::delete('/categories/{category}', [AdminController::class, 'deleteCategory'])->name('categories.delete');
     Route::get('/products', [AdminController::class, 'products'])->name('products');
+    Route::get('/products/search', [AdminController::class, 'searchProducts'])->name('products.search');
+    Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store');
+    Route::put('/products/{product}', [AdminController::class, 'updateProduct'])->name('products.update');
+    Route::delete('/products/{product}', [AdminController::class, 'deleteProduct'])->name('products.delete');
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('feedbacks');
 });

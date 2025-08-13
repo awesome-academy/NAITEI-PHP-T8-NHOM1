@@ -124,46 +124,171 @@
             <h3>{{ __('Add New Product') }}</h3>
             <button class="modal-close" onclick="adminPanel.closeModal('productModal')">&times;</button>
         </div>
-        <form>
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">{{ __('Product Name') }}</label>
-                    <input type="text" class="form-control" required>
+                    <input type="text" name="name" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">{{ __('Category') }}</label>
-                    <select class="form-control" required>
+                    <select name="category_id" class="form-control" required>
                         <option value="">{{ __('Select Category') }}</option>
-                        <option value="1">{{ __('Living Room') }}</option>
-                        <option value="2">{{ __('Bedroom') }}</option>
-                        <option value="3">{{ __('Kitchen') }}</option>
-                        <option value="4">{{ __('Dining Room') }}</option>
-                        <option value="5">{{ __('Office') }}</option>
+                        @foreach($categories ?? [] as $category)
+                            <option value="{{ $category->category_id }}">{{ $category->name }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">{{ __('Cost (VNĐ)') }}</label>
-                    <input type="number" class="form-control" required>
+                    <label class="form-label">{{ __('Price (VNĐ)') }}</label>
+                    <input type="number" name="price" class="form-control" min="0" step="0.01" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">{{ __('Quantity') }}</label>
-                    <input type="number" class="form-control" required>
+                    <label class="form-label">{{ __('Stock') }}</label>
+                    <input type="number" name="stock" class="form-control" min="0" required>
                 </div>
             </div>
             <div class="form-group">
                 <label class="form-label">{{ __('Description') }}</label>
-                <textarea class="form-control" rows="4"></textarea>
+                <textarea name="description" class="form-control" rows="4"></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">{{ __('Images') }}</label>
-                <input type="file" class="form-control" accept="image/*" multiple>
+                <label class="form-label">{{ __('Image') }}</label>
+                <input type="file" name="image" class="form-control" accept="image/*">
             </div>
             <div style="text-align: right; margin-top: 25px;">
                 <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('productModal')">{{ __('Cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ __('Add Product') }}</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal" id="editProductModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Edit Product') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('editProductModal')">&times;</button>
+        </div>
+        <form id="editProductForm" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="product_id" id="edit_product_id">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Product Name') }}</label>
+                    <input type="text" name="name" id="edit_product_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Category') }}</label>
+                    <select name="category_id" id="edit_product_category" class="form-control" required>
+                        <option value="">{{ __('Select Category') }}</option>
+                        @foreach($categories ?? [] as $category)
+                            <option value="{{ $category->category_id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Price (VNĐ)') }}</label>
+                    <input type="number" name="price" id="edit_product_price" class="form-control" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Stock') }}</label>
+                    <input type="number" name="stock" id="edit_product_stock" class="form-control" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ __('Description') }}</label>
+                <textarea name="description" id="edit_product_description" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ __('Image') }}</label>
+                <input type="file" name="image" class="form-control" accept="image/*">
+            </div>
+            <div style="text-align: right; margin-top: 25px;">
+                <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('editProductModal')">{{ __('Cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ __('Update Product') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Product Modal -->
+<div class="modal" id="deleteProductModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Delete Product') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('deleteProductModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>{{ __('Are you sure you want to delete this product? This action cannot be undone.') }}</p>
+        </div>
+        <div style="text-align: right; margin-top: 25px;">
+            <button type="button" class="btn btn-secondary" id="cancelDeleteProductBtn">{{ __('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteProductBtn">{{ __('Delete') }}</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Product Modal -->
+<div class="modal" id="viewProductModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Product Details') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('viewProductModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Product ID') }}</label>
+                    <input type="text" id="view_product_id" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Product Name') }}</label>
+                    <input type="text" id="view_product_name" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Category') }}</label>
+                    <input type="text" id="view_product_category" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Price (VNĐ)') }}</label>
+                    <input type="text" id="view_product_price" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Stock') }}</label>
+                    <input type="text" id="view_product_stock" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Status') }}</label>
+                    <input type="text" id="view_product_status" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ __('Description') }}</label>
+                <textarea id="view_product_description" class="form-control" rows="4" readonly></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ __('Product Image') }}</label>
+                <div id="view_product_image_container" style="margin-top: 10px;">
+                    <img id="view_product_image" src="" alt="Product Image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
+                    <p id="view_no_image" style="color: #666; display: none;">{{ __('No image available') }}</p>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 25px;">
+            <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('viewProductModal')">{{ __('Close') }}</button>
+        </div>
     </div>
 </div>

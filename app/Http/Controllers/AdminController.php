@@ -13,10 +13,13 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 
 class AdminController extends Controller
 {
     private const CATEGORY_IMAGE_DIR = 'images/categories';
+    private const PRODUCT_IMAGE_DIR = 'images/products';
 
     public function dashboard()
     {
@@ -48,7 +51,7 @@ class AdminController extends Controller
 
     public function users()
     {
-        $users = User::all();
+        $users = User::paginate(10);
         return view('admin.pages.users', compact('users'));
     }
 
@@ -133,8 +136,93 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::with('category')->get();
-        return view('admin.pages.products', compact('products'));
+        $products = Product::with('category')->paginate(10); // paginate products (10 per page)
+        $categories = Category::all();
+        return view('admin.pages.products', compact('products', 'categories'));
+    }
+
+    public function storeProduct(StoreProductRequest $request)
+    {
+        $validated = $request->validated();
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'svg'];
+            $extension = $image->guessExtension();
+            if (!in_array($extension, $allowedExtensions)) {
+                return redirect()->back()->withErrors(['image' => 'Invalid image extension.']);
+            }
+            $imageName = Str::uuid() . '.' . $extension;
+            $image->move(public_path(self::PRODUCT_IMAGE_DIR), $imageName);
+            $validated['image'] = self::PRODUCT_IMAGE_DIR . '/' . $imageName;
+        }
+
+        Product::create($validated);
+        return redirect()->route('admin.products')->with('success', 'Product added successfully.');
+    }
+
+    public function updateProduct(UpdateProductRequest $request, Product $product)
+    {
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            // delete the old image
+            if ($product->image && File::exists(public_path($product->image))) {
+                File::delete(public_path($product->image));
+            }
+            
+            $image = $request->file('image');
+            $imageName = Str::uuid() . '.' . $image->extension();
+            $image->move(public_path(self::PRODUCT_IMAGE_DIR), $imageName);
+            $validated['image'] = self::PRODUCT_IMAGE_DIR . '/' . $imageName;
+        }
+
+        $product->update($validated);
+        return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
+    }
+
+    public function deleteProduct(Product $product)
+    {
+        // delete the old image
+        if ($product->image) {
+            if (File::exists(public_path($product->image))) {
+                File::delete(public_path($product->image));
+            }
+        }
+        
+        $product->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function searchProducts(Request $request)
+    {
+        $query = $request->input('query');
+        $categoryId = $request->input('category_id');
+        
+        $productsQuery = Product::with('category');
+        
+        // search filter
+        if (!empty($query)) {
+            // $productsQuery->where(function($q) use ($query) {
+            //     $q->where('name', 'like', "%{$query}%");
+            // }); // use this if we want to search in multiple fields
+
+            $productsQuery->where('name', 'like', "%{$query}%");
+        }
+        
+        // category filter
+        if (!empty($categoryId) && $categoryId !== 'all') {
+            $productsQuery->where('category_id', $categoryId);
+        }
+        
+        $products = $productsQuery->paginate(10);
+        $categories = Category::all();
+        
+        // ensure that search parameters are kept in pagination links
+        $products->appends($request->only(['query', 'category_id']));
+        
+        return view('admin.pages.products', compact('products', 'categories'));
     }
 
     public function orders()
