@@ -15,6 +15,9 @@ class Role extends Model
 
     protected $fillable = ['name'];
 
+    public const ADMIN = 1;
+    public const CUSTOMER = 2;
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'role_id');

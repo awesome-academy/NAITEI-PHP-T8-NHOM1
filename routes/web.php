@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\GoogleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,5 +63,9 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
 });
 
 Route::get('language/{lang}', [LanguageController::class, 'changeLanguage'])->name('locale');
+
+// Google routes
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 require __DIR__.'/auth.php';
