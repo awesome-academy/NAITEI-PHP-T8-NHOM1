@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
     Route::get('/categories', [CustomerController::class, 'categories'])->name('categories');
     Route::get('/products/{category}', [CustomerController::class, 'products'])->name('products');
+    Route::get('/about', [CustomerController::class, 'about'])->name('about');
+    Route::get('/contact', [CustomerController::class, 'contact'])->name('contact');
 });
 
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {

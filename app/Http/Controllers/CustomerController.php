@@ -30,4 +30,20 @@ class CustomerController extends Controller
         
         return view('customer.pages.products', compact('category', 'products'));
     }
+
+    /**
+     * Display the about page
+     */
+    public function about()
+    {
+        return view('customer.pages.about');
+    }
+
+    /**
+     * Display the contact page
+     */
+    public function contact()
+    {
+        return view('customer.pages.contact');
+    }
 }
