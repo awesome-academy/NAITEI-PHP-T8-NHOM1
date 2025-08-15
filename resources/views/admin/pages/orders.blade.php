@@ -10,7 +10,7 @@
                     <option>{{ __('All Statuses') }}</option>
                     <option>{{ __('Pending') }}</option>
                     <option>{{ __('Approved') }}</option>
-                    <option>{{ __('Reject') }}</option>
+                    <option>{{ __('Rejected') }}</option>
                     <option>{{ __('Delivered') }}</option>
                     <option>{{ __('Cancelled') }}</option>
                 </select>
@@ -37,52 +37,44 @@
                         <td>{{ number_format($order->total_cost) }} {{ __('VNĐ') }}</td>
                         <td>
                             @php
-                                $latestStatus = $order->statusOrders()
-                                    ->orderBy('date', 'desc')
-                                    ->first();
-                                
-                                $status = $latestStatus ? $latestStatus->action_type : 'pending';
-                                
+                                $status = $order->status ?? 'pending';
                                 $statusClasses = [
                                     'pending' => 'status-pending',
                                     'approved' => 'status-approved',
-                                    'reject' => 'status-reject',
+                                    'rejected' => 'status-reject',
                                     'delivered' => 'status-delivered',
                                     'cancelled' => 'status-cancelled'
                                 ];
-                                
                                 $statusTexts = [
                                     'pending' => __('Pending'),
                                     'approved' => __('Approved'),
-                                    'reject' => __('Rejected'),
+                                    'rejected' => __('Rejected'),
                                     'delivered' => __('Delivered'),
                                     'cancelled' => __('Cancelled')
                                 ];
-                                
                                 $statusClass = $statusClasses[$status] ?? 'status-pending';
                                 $statusText = $statusTexts[$status] ?? __('Pending');
                             @endphp
                             <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
                         </td>
                         <td>
-                            @if($status == 'pending')
-                                <button class="btn btn-success btn-sm" onclick="adminPanel.approveOrder('{{ $order->order_id }}')">
-                                    <i class="fas fa-check"></i> {{ __('Approve') }}
+                            <form action="{{ route('admin.orders.status.update', $order->order_id) }}" method="POST" style="display:inline-flex; gap:8px; align-items:center;">
+                                @csrf
+                                @method('PATCH')
+                                <select name="status" class="form-control" style="width:auto;">
+                                    <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                                    <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>{{ __('Approve') }}</option>
+                                    <option value="rejected" {{ $status==='rejected' ? 'selected' : '' }}>{{ __('Reject') }}</option>
+                                    <option value="delivered" {{ $status==='delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
+                                    <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>{{ __('Cancel') }}</option>
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-save"></i> {{ __('Update') }}
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="adminPanel.rejectOrder('{{ $order->order_id }}')">
-                                    <i class="fas fa-times"></i> {{ __('Reject') }}
-                                </button>
-                                <button class="btn btn-secondary btn-sm" onclick="adminPanel.viewOrderDetails('{{ $order->order_id }}')">
+                            </form>
+                                <button class="btn btn-secondary btn-sm view-order-details-btn" data-order-id="{{ $order->order_id }}">
                                     <i class="fas fa-eye"></i> {{ __('View Details') }}
                                 </button>
-                            @else
-                                <button class="btn btn-secondary btn-sm" onclick="adminPanel.viewOrderDetails('{{ $order->order_id }}')">
-                                    <i class="fas fa-eye"></i> {{ __('View Details') }}
-                                </button>
-                                <span class="text-muted">
-                                    <small>({{ $statusText }})</small>
-                                </span>
-                            @endif
                         </td>
                     </tr>
                     @empty
@@ -95,4 +87,69 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Handle View Details button click
+        document.querySelectorAll('.view-order-details-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const orderId = e.currentTarget.getAttribute('data-order-id');
+                if (!orderId) {
+                    console.error('Order ID not found for view details button.');
+                    return;
+                }
+                
+                fetch(`/admin/orders/${orderId}/details`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Order details received:', data);
+                    const order = data.order;
+                    const customerName = data.customer_name;
+                    const orderItems = data.order_items;
+                    const statusHistory = data.status_history;
+        
+                    // Populate general order info
+                    document.getElementById('order_detail_id').value = `#${order.order_id}`;
+                    document.getElementById('order_detail_customer_name').value = customerName;
+                    document.getElementById('order_detail_date').value = new Date(order.order_date).toLocaleDateString();
+                    document.getElementById('order_detail_total_amount').value = `${order.total_cost.toLocaleString()} VNĐ`;
+                    document.getElementById('order_detail_status').value = order.status;
+        
+                    // Populate order items table
+                    const itemsTableBody = document.querySelector('#order_detail_items_table tbody');
+                    itemsTableBody.innerHTML = ''; // Clear previous items
+                    orderItems.forEach(item => {
+                        const row = `
+                            <tr>
+                                <td>${item.product_name}</td>
+                                <td>${item.quantity}</td>
+                                <td>${item.price.toLocaleString()} VNĐ</td>
+                                <td>${item.subtotal.toLocaleString()} VNĐ</td>
+                            </tr>
+                        `;
+                        itemsTableBody.insertAdjacentHTML('beforeend', row);
+                    });
+        
+                    adminPanel.openModal('viewOrderDetailsModal');
+                })
+                .catch(error => {
+                    console.error('Error fetching order details:', error);
+                    alert('{{ __('Failed to load order details.') }}');
+                });
+            });
+        });
+    });
+</script>
 @endsection

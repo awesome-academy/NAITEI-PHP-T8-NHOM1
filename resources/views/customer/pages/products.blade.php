@@ -64,7 +64,7 @@
     @forelse($products as $product)
     <div class="product-card">
         <div class="product-image">
-            <img src="{{ $product->image ?? '/images/default-product.svg' }}" alt="{{ $product->name }}">
+            <img src="{{ asset($product->image ?? 'images/default-product.svg') }}" alt="{{ $product->name }}">
             
             <!-- Product badges -->
             @if(!empty($product->discount_percentage))
@@ -75,7 +75,7 @@
             @endif
             
             <div class="product-overlay">
-                <button class="add-to-cart-btn">{{ __('Add to cart') }}</button>
+                <button class="add-to-cart-btn" data-url="{{ route('customer.cart.add', ['product' => $product]) }}">{{ __('Add to cart') }}</button>
                 <div class="product-actions">
                     <button class="action-btn">
                         <i class="fas fa-share-alt"></i>
@@ -306,3 +306,57 @@
 }
 </style>
 @endpush
+
+@section('scripts')
+<script>
+// Script for Add to Cart functionality
+document.addEventListener('DOMContentLoaded', function () {
+    // Get the CSRF token from the meta tag in the document head.
+    // This token is essential for Laravel to protect against Cross-Site Request Forgery (CSRF) attacks.
+    var csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Select all buttons with the class 'add-to-cart-btn' that also have a 'data-url' attribute.
+    // The 'data-url' attribute holds the URL where the cart addition request should be sent.
+    document.querySelectorAll('.add-to-cart-btn[data-url]').forEach(function (btn) {
+        // Attach a click event listener to each 'Add to cart' button.
+        btn.addEventListener('click', function (e) {
+            // Prevent the default form submission behavior of the button.
+            e.preventDefault();
+
+            // Get the URL for the cart addition request from the 'data-url' attribute.
+            var url = btn.getAttribute('data-url');
+            
+            // If no URL is found, stop the function execution.
+            if (!url) return;
+
+            // Create a new HTML <form> element dynamically.
+            var form = document.createElement('form');
+            form.method = 'POST'; // Set the form method to POST.
+            form.action = url;    // Set the form action URL.
+
+            // Create a hidden input field for the CSRF token.
+            var tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token'; // Laravel expects the CSRF token in a field named '_token'.
+            tokenInput.value = csrf;    // Assign the retrieved CSRF token value.
+            form.appendChild(tokenInput); // Append the CSRF token input to the form.
+
+            // Create a hidden input field for the quantity (defaulting to 1).
+            var qtyInput = document.createElement('input');
+            qtyInput.type = 'hidden';
+            qtyInput.name = 'quantity';
+            qtyInput.value = '1';
+            form.appendChild(qtyInput); // Append the quantity input to the form.
+
+            // Append the dynamically created form to the document body.
+            // This is necessary for the form to be submit-able by JavaScript.
+            document.body.appendChild(form);
+
+            // Submit the form programmatically.
+            // This will trigger a POST request to the specified URL.
+            form.submit();
+        });
+    });
+});
+</script>
+@endsection

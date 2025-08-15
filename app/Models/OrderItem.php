@@ -14,6 +14,10 @@ class OrderItem extends Model
 
     protected $fillable = ['order_id', 'product_id', 'quantity', 'price'];
 
+    protected $casts = [
+        'price' => 'float',
+    ];
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');

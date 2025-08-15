@@ -13,7 +13,7 @@ class Order extends Model
 
     protected $primaryKey = 'order_id';
 
-    protected $fillable = ['customer_id', 'order_date', 'total_cost'];
+    protected $fillable = ['customer_id', 'order_date', 'total_cost', 'status'];
 
     public function user(): BelongsTo
     {

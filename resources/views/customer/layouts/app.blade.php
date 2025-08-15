@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Furniro - Premium Furniture')</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -87,8 +88,12 @@
         
         /* Hero Section */
         .hero-section {
-            background: url('/images/hero-bg.jpg') center/cover;
-            height: 316px;
+            background: url('/images/default-product.svg') center/cover;
+            background-size: cover;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            min-height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -139,7 +144,7 @@
         
         /* Main Content */
         .main-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -224,5 +229,6 @@
     @include('customer.components.footer')
     
     @stack('scripts')
+    @yield('scripts')
 </body>
 </html>

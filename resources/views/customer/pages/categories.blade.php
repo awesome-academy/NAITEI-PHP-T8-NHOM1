@@ -61,7 +61,7 @@
     @forelse($categories as $category)
     <div class="category-card">
         <div class="category-image">
-            <img src="{{ $category->image ?? '/images/default-category.svg' }}" alt="{{ $category->name }}">
+            <img src="{{ asset($category->image ?? 'images/default-category.svg') }}" alt="{{ $category->name }}">
             <div class="category-overlay">
                 <a href="{{ route('customer.products', $category->category_id) }}" class="view-products-btn">
                     {{ __('View Products') }}

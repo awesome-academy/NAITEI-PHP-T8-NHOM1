@@ -14,6 +14,7 @@
                 <thead>
                     <tr>
                         <th>{{ __('ID') }}</th>
+                        <th>{{ __('Image') }}</th>
                         <th>{{ __('Category Name') }}</th>
                         <th>{{ __('Products Count') }}</th>
                         <th>{{ __('Created Date') }}</th>
@@ -25,6 +26,12 @@
                     @forelse($categories as $category)
                     <tr data-id="{{ $category->category_id }}">
                         <td>#{{ $category->category_id }}</td>
+                        <td>
+							@php
+								$imgSrc = $category->image ? asset($category->image) : asset('images/default-category.svg');
+							@endphp
+							<img src="{{ $imgSrc }}" alt="{{ $category->name }}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid #eee;">
+						</td>
                         <td>{{ __($category->name) }}</td>
                         <td>{{ $category->products_count }} {{ __('products') }}</td>
                         <td>{{ $category->created_at ? $category->created_at->format('d/m/Y') : __('N/A') }}</td>
@@ -45,7 +52,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="text-align: center;">{{ __('No categories found') }}</td>
+                        <td colspan="7" style="text-align: center;">{{ __('No categories found') }}</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -90,11 +97,11 @@
         });
     });
     // Handle delete confirmation modal actions
-    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+    document.getElementById('cancelDeleteCategoryBtn').addEventListener('click', () => {
         adminPanel.closeModal('deleteCategoryModal');
         categoryIdToDelete = null;
     });
-    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    document.getElementById('confirmDeleteCategoryBtn').addEventListener('click', () => {
         if (!categoryIdToDelete) return;
         fetch(`/admin/categories/${categoryIdToDelete}`, {
             method: 'DELETE',
@@ -102,11 +109,6 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             }
-        // }).then(response => {
-        //     if (response.ok) {
-        //         window.location.reload();
-        //     } else {
-        //         alert('Failed to delete category.');
         }).then(async response => {
             if (response.ok) {
                 window.location.reload();

@@ -50,6 +50,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(RouteServiceProvider::HOME);
+        // Redirect to customer categories after successful registration
+        return redirect()->route('customer.categories');
     }
 }

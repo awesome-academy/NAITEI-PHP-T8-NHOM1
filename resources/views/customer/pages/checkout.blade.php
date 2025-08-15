@@ -1,0 +1,180 @@
+@extends('customer.layouts.app')
+
+@section('title', __('Checkout') . ' - Furniro')
+
+@section('hero')
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>{{ __('Checkout') }}</h1>
+        <div class="breadcrumb">
+            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{{ route('customer.cart.index') }}">{{ __('Cart') }}</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ __('Checkout') }}</span>
+        </div>
+    </div>
+</section>
+@endsection
+
+@section('content')
+@if(session('success'))
+    <div class="alert-success">{{ session('success') }}</div>
+@endif
+
+<div class="cart-wrapper">
+    <div class="cart-main">
+        <div class="cart-table">
+            <div class="cart-header">
+                <div class="col-product">{{ __('Product') }}</div>
+                <div class="col-price">{{ __('Price') }}</div>
+                <div class="col-quantity">{{ __('Quantity') }}</div>
+                <div class="col-subtotal">{{ __('Subtotal') }}</div>
+            </div>
+
+            @foreach($cart as $item)
+            <div class="cart-row">
+                <div class="col-product">
+                    <img src="{{ $item['image'] ?? asset('images/default-product.svg') }}" alt="{{ $item['name'] }}">
+                    <div class="info">
+                        <div class="name">{{ $item['name'] }}</div>
+                        <div class="sku">#{{ $item['id'] }}</div>
+                    </div>
+                </div>
+                <div class="col-price">{{ number_format($item['price'], 0, '.', ',') }} {{ __('VND') }}</div>
+                <div class="col-quantity">x {{ $item['quantity'] }}</div>
+                <div class="col-subtotal">{{ number_format($item['price'] * $item['quantity'], 0, '.', ',') }} {{ __('VND') }}</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    <div class="cart-summary">
+        <h3>{{ __('Order Summary') }}</h3>
+        <div class="summary-row">
+            <span>{{ __('Items') }}</span>
+            <span>{{ $totalQuantity ?? 0 }}</span>
+        </div>
+        <div class="summary-row total">
+            <span>{{ __('Total') }}</span>
+            <span>{{ number_format($totalPrice ?? 0, 0, '.', ',') }} {{ __('VND') }}</span>
+        </div>
+        <form action="{{ route('customer.checkout.store') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn-primary full">{{ __('Place Order') }}</button>
+        </form>
+    </div>
+</div>
+@endsection
+
+@push('styles')
+<style>
+.alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+.cart-wrapper {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.cart-table {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cart-header,
+.cart-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.5fr 0.5fr 0.6fr;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+}
+
+.cart-header {
+    background: #F9F1E7;
+    font-weight: 600;
+    color: #3A3A3A;
+}
+
+.cart-row {
+    border-top: 1px solid #f1f1f1;
+}
+
+.col-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.col-product img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.col-product .info .name {
+    font-weight: 600;
+    color: #3A3A3A;
+}
+
+.col-product .info .sku {
+    color: #999;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.cart-summary {
+    background: #F9F1E7;
+    padding: 24px;
+    border-radius: 8px;
+    height: fit-content;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.summary-row.total {
+    font-weight: 700;
+    color: #3A3A3A;
+}
+
+.btn-primary {
+    background: #B88E2F;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-primary.full {
+    width: 100%;
+    margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+    .cart-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+@endpush 

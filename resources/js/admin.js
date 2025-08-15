@@ -141,6 +141,7 @@ class AdminPanel {
     logout() {
         //console.log('Logout method called');
     }
+
 }
 
 // Language selector function

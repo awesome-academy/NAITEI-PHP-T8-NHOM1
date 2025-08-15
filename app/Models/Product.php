@@ -38,4 +38,9 @@ class Product extends Model
     {
         return $this->hasMany(ManageProduct::class, 'product_id');
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'product_id';
+    }
 }
