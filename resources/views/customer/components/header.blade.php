@@ -12,6 +12,13 @@
         </nav>
         
         <div class="header-icons">
+            @php
+                $cart = session('cart', []);
+                $cartCount = 0;
+                foreach ($cart as $it) {
+                    $cartCount += (int) ($it['quantity'] ?? 0);
+                }
+            @endphp
             <div class="user-dropdown">
                 <a href="#" id="userDropdown">
                     <i class="fas fa-user"></i>
@@ -50,7 +57,12 @@
             </div>
             <a href="#"><i class="fas fa-search"></i></a>
             <a href="#"><i class="fas fa-heart"></i></a>
-            <a href="#"><i class="fas fa-shopping-cart"></i></a>
+            <a href="{{ route('customer.cart.index') }}" class="cart-link">
+                <i class="fas fa-shopping-cart"></i>
+                @if($cartCount > 0)
+                <span class="cart-count">{{ $cartCount }}</span>
+                @endif
+            </a>
         </div>
     </div>
 </header>
@@ -172,6 +184,25 @@
     width: 100%;
     text-align: left;
     cursor: pointer;
+}
+
+/* Cart icon badge */
+.cart-link {
+    position: relative;
+    display: inline-block;
+}
+.cart-count {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: #E97171;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1;
+    padding: 2px 6px;
+    min-width: 18px;
+    text-align: center;
 }
 </style>
 

@@ -6,6 +6,8 @@ use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +40,17 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
     Route::get('/products/{category}', [CustomerController::class, 'products'])->name('products');
     Route::get('/about', [CustomerController::class, 'about'])->name('about');
     Route::get('/contact', [CustomerController::class, 'contact'])->name('contact');
+
+    // Cart routes
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update/{product}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+    // Checkout routes
+    Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
 
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
@@ -59,6 +72,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::put('/products/{product}', [AdminController::class, 'updateProduct'])->name('products.update');
     Route::delete('/products/{product}', [AdminController::class, 'deleteProduct'])->name('products.delete');
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
+    Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status.update');
+    Route::get('/orders/{order}/details', [AdminController::class, 'showOrderDetails'])->name('orders.details');
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('feedbacks');
 });
 

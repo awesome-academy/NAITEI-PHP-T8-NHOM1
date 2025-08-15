@@ -161,8 +161,8 @@
             <p>{{ __('Are you sure you want to delete this category? This action cannot be undone.') }}</p>
         </div>
         <div style="text-align: right; margin-top: 25px;">
-            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">{{ __('Cancel') }}</button>
-            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">{{ __('Delete') }}</button>
+            <button type="button" class="btn btn-secondary" id="cancelDeleteCategoryBtn">{{ __('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteCategoryBtn">{{ __('Delete') }}</button>
         </div>
     </div>
 </div>
@@ -339,6 +339,61 @@
         </div>
         <div style="text-align: right; margin-top: 25px;">
             <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('viewProductModal')">{{ __('Close') }}</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Order Details Modal -->
+<div class="modal" id="viewOrderDetailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Order Details') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('viewOrderDetailsModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Order ID') }}</label>
+                    <input type="text" id="order_detail_id" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Customer Name') }}</label>
+                    <input type="text" id="order_detail_customer_name" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Order Date') }}</label>
+                    <input type="text" id="order_detail_date" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Total Amount') }}</label>
+                    <input type="text" id="order_detail_total_amount" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Current Status') }}</label>
+                    <input type="text" id="order_detail_status" class="form-control" readonly>
+                </div>
+            </div>
+            <h4>{{ __('Order Items') }}</h4>
+            <table class="table table-striped table-bordered" id="order_detail_items_table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Product') }}</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Quantity') }}</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Price') }}</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Subtotal') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Order items will be loaded here by JS -->
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer" style="text-align: right; margin-top: 25px;">
+            <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('viewOrderDetailsModal')">{{ __('Close') }}</button>
         </div>
     </div>
 </div>

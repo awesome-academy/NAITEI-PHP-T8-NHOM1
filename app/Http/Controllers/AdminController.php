@@ -18,6 +18,8 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\DB;
+use App\Models\StatusOrder;
 
 class AdminController extends Controller
 {
@@ -307,5 +309,47 @@ class AdminController extends Controller
     {
         $feedbacks = Feedback::with('user', 'product')->get();
         return view('admin.pages.feedbacks', compact('feedbacks'));
+    }
+
+    public function updateOrderStatus(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['pending', 'approved', 'rejected', 'delivered', 'cancelled'])],
+        ]);
+
+        DB::transaction(function () use ($order, $validated) {
+            $oldStatus = $order->status;
+            if ($oldStatus === $validated['status']) {
+                return; // No change
+            }
+            $order->update(['status' => $validated['status']]);
+
+            StatusOrder::create([
+                'action_type' => $validated['status'],
+                'date' => now(),
+                'admin_id' => auth()->id(),
+                'order_id' => $order->getKey(),
+            ]);
+        });
+
+        return redirect()->route('admin.orders')->with('success', __('Order status updated.'));
+    }
+
+    public function showOrderDetails(Order $order)
+    {
+        $order->load('user', 'orderItems.product');
+        
+        return response()->json([
+            'order' => $order,
+            'customer_name' => $order->user->name ?? $order->user->user_name ?? __('N/A'),
+            'order_items' => $order->orderItems->map(function ($item) {
+                return [
+                    'product_name' => $item->product->name,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'subtotal' => $item->quantity * $item->price,
+                ];
+            }),
+        ]);
     }
 }
