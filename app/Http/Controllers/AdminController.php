@@ -299,9 +299,27 @@ class AdminController extends Controller
         return view('admin.pages.products', compact('products', 'categories'));
     }
 
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = Order::with('user')->get();
+        $query = Order::with('user');
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('order_date', '>=', $request->input('from_date'));
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('order_date', '<=', $request->input('to_date'));
+        }
+
+        // Order by most recent first
+        $orders = $query->orderBy('order_date', 'desc')->get();
+
         return view('admin.pages.orders', compact('orders'));
     }
 

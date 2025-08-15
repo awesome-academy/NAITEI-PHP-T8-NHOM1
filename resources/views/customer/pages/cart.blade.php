@@ -92,6 +92,7 @@
 			<span>{{ __('Total') }}</span>
 			<span>{{ number_format($totalPrice ?? 0, 0, '.', ',') }} {{ __('VND') }}</span>
 		</div>
+		<br>
 		<a href="{{ route('customer.checkout.create') }}" class="btn-primary full">{{ __('Proceed to Checkout') }}</a>
 	</div>
 </div>

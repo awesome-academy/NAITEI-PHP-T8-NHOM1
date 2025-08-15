@@ -22,6 +22,24 @@
     <div class="alert-success">{{ session('success') }}</div>
 @endif
 
+@if(session('error'))
+    <div class="alert-error">{{ session('error') }}</div>
+@endif
+
+@if(session('info'))
+    <div class="alert-info">{{ session('info') }}</div>
+@endif
+
+@if ($errors->any())
+    <div class="alert-error">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="cart-wrapper">
     <div class="cart-main">
         <div class="cart-table">
@@ -35,7 +53,7 @@
             @foreach($cart as $item)
             <div class="cart-row">
                 <div class="col-product">
-                    <img src="{{ $item['image'] ?? asset('images/default-product.svg') }}" alt="{{ $item['name'] }}">
+                    <img src="{{ isset($item['image']) ? asset($item['image']) : asset('images/default-product.svg') }}" alt="{{ $item['name'] }}">
                     <div class="info">
                         <div class="name">{{ $item['name'] }}</div>
                         <div class="sku">#{{ $item['id'] }}</div>
@@ -59,7 +77,7 @@
             <span>{{ __('Total') }}</span>
             <span>{{ number_format($totalPrice ?? 0, 0, '.', ',') }} {{ __('VND') }}</span>
         </div>
-        <form action="{{ route('customer.checkout.store') }}" method="POST">
+        <form action="{{ route('customer.checkout.store') }}" method="POST" onsubmit="return confirmOrder()">
             @csrf
             <button type="submit" class="btn-primary full">{{ __('Place Order') }}</button>
         </form>
@@ -77,6 +95,30 @@
     border-radius: 6px;
     margin-bottom: 16px;
 }
+
+.alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.alert-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.alert-error ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
 .cart-wrapper {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -177,4 +219,11 @@
     }
 }
 </style>
-@endpush 
+@endpush
+@push('scripts')
+<script>
+function confirmOrder() {
+    return confirm('{{ __("Are you sure you want to place this order?") }}');
+}
+</script>
+@endpush

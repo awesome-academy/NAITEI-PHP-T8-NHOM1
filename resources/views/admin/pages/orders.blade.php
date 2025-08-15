@@ -5,17 +5,56 @@
     <div class="table-container">
         <div class="table-header">
             <h2 class="table-title">{{ __('Order Management') }}</h2>
-            <div>
-                <select class="form-control" style="width: auto; display: inline-block; margin-right: 10px;">
-                    <option>{{ __('All Statuses') }}</option>
-                    <option>{{ __('Pending') }}</option>
-                    <option>{{ __('Approved') }}</option>
-                    <option>{{ __('Rejected') }}</option>
-                    <option>{{ __('Delivered') }}</option>
-                    <option>{{ __('Cancelled') }}</option>
-                </select>
-            </div>
         </div>
+        <div style="padding: 20px; border-bottom: 1px solid #eee;">
+            <form method="GET" action="{{ route('admin.orders') }}" id="orderFilterForm" style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="margin-bottom: 5px; font-weight: 500;">{{ __('Status') }}</label>
+                    <select name="status" class="form-control" style="width: 160px;">
+                        <option value="">{{ __('All Statuses') }}</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
+                        <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; flex-direction: column;">
+                    <label style="margin-bottom: 5px; font-weight: 500;">{{ __('From Date') }}</label>
+                    <input type="date" name="from_date" class="form-control" style="width: 150px;" value="{{ request('from_date') }}">
+                </div>
+                
+                <div style="display: flex; flex-direction: column;">
+                    <label style="margin-bottom: 5px; font-weight: 500;">{{ __('To Date') }}</label>
+                    <input type="date" name="to_date" class="form-control" style="width: 150px;" value="{{ request('to_date') }}">
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ route('admin.orders') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> {{ __('Clear') }}
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        @if(request()->hasAny(['status', 'from_date', 'to_date']))
+        <div style="padding: 10px 20px; background-color: #f8f9fa; border-bottom: 1px solid #eee;">
+            <small class="text-muted">
+                {{ __('Filtered results') }}: {{ $orders->count() }} {{ __('orders found') }}
+                @if(request('status'))
+                    | {{ __('Status') }}: <strong>{{ __(ucfirst(request('status'))) }}</strong>
+                @endif
+                @if(request('from_date'))
+                    | {{ __('From') }}: <strong>{{ \Carbon\Carbon::parse(request('from_date'))->format('d/m/Y') }}</strong>
+                @endif
+                @if(request('to_date'))
+                    | {{ __('To') }}: <strong>{{ \Carbon\Carbon::parse(request('to_date'))->format('d/m/Y') }}</strong>
+                @endif
+            </small>
+        </div>
+        @endif
+        
         <div style="padding: 20px;">
             <table class="data-table">
                 <thead>
@@ -91,7 +130,62 @@
 
 @section('scripts')
 <script>
+    // Translations are injected from the backend using Blade's __() helper.
+    // This approach makes localized strings available in JavaScript without a dedicated localization library or API.
+    // If you need to support more languages or dynamic translations, consider using a standard localization solution.
+    const translations = {
+        approved: "{{ __('Approved') }}",
+        pending: "{{ __('Pending') }}",
+        rejected: "{{ __('Rejected') }}",
+        delivered: "{{ __('Delivered') }}",
+        cancelled: "{{ __('Cancelled') }}"
+    };
+
+    function ucfirst(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        const statusSelect = document.querySelector('select[name="status"]');
+        const fromDateInput = document.querySelector('input[name="from_date"]');
+        const toDateInput = document.querySelector('input[name="to_date"]');
+        
+        // auto-submit when status changes
+        statusSelect.addEventListener('change', () => {
+            document.getElementById('orderFilterForm').submit();
+        });
+        
+        // auto-submit when from date changes
+        fromDateInput.addEventListener('change', function() {
+            if (toDateInput.value && this.value > toDateInput.value) {
+                dateErrorMsg.textContent = '{{ __('From date cannot be later than To date') }}';
+                dateErrorMsg.style.display = 'block';
+                this.value = '';
+                return;
+            } else {
+                dateErrorMsg.textContent = '';
+                dateErrorMsg.style.display = 'none';
+            }
+            // auto-submit if date is valid
+            if (this.value) {
+                document.getElementById('orderFilterForm').submit();
+            }
+        });
+        
+        // auto-submit when to date changes
+        toDateInput.addEventListener('change', function() {
+            if (fromDateInput.value && this.value < fromDateInput.value) {
+                alert('{{ __('To date cannot be earlier than From date') }}');
+                this.value = '';
+                return;
+            }
+            // auto-submit if date is valid
+            if (this.value) {
+                document.getElementById('orderFilterForm').submit();
+            }
+        });
+
         // Handle View Details button click
         document.querySelectorAll('.view-order-details-btn').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -100,6 +194,18 @@
                     console.error('Order ID not found for view details button.');
                     return;
                 }
+                
+                // Show loading state immediately
+                const itemsList = document.getElementById('order_detail_items_list');
+                itemsList.innerHTML = `
+                    <div class="order-items-loading">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p style="margin-top: 10px;">{{ __('Loading order details...') }}</p>
+                    </div>
+                `;
+                
+                // Open modal first to show loading
+                adminPanel.openModal('viewOrderDetailsModal');
                 
                 fetch(`/admin/orders/${orderId}/details`, {
                     headers: {
@@ -125,28 +231,88 @@
                     document.getElementById('order_detail_customer_name').value = customerName;
                     document.getElementById('order_detail_date').value = new Date(order.order_date).toLocaleDateString();
                     document.getElementById('order_detail_total_amount').value = `${order.total_cost.toLocaleString()} VNĐ`;
-                    document.getElementById('order_detail_status').value = order.status;
-        
-                    // Populate order items table
-                    const itemsTableBody = document.querySelector('#order_detail_items_table tbody');
-                    itemsTableBody.innerHTML = ''; // Clear previous items
-                    orderItems.forEach(item => {
-                        const row = `
-                            <tr>
-                                <td>${item.product_name}</td>
-                                <td>${item.quantity}</td>
-                                <td>${item.price.toLocaleString()} VNĐ</td>
-                                <td>${item.subtotal.toLocaleString()} VNĐ</td>
-                            </tr>
+                    document.getElementById('order_detail_status').value = ucfirst(translations[order.status] || '{{ __("Unknown Status") }}'); 
+
+                    // Populate order items list
+                    const itemsList = document.getElementById('order_detail_items_list');
+                    itemsList.innerHTML = ''; // Clear previous items
+                    orderItems.forEach((item, index) => {
+                        const itemCard = `
+                            <div class="order-item-card" style="
+                                background: white; 
+                                margin-bottom: 1px; 
+                                padding: 16px 20px; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: space-between;
+                                border-left: 4px solid #007bff;
+                                transition: all 0.2s ease;
+                            " onmouseover="this.style.backgroundColor='#f1f3f5'" onmouseout="this.style.backgroundColor='white'">
+                                <div style="display: flex; align-items: center; flex: 1;">
+                                    <div style="
+                                        background: linear-gradient(135deg, #007bff, #0056b3); 
+                                        color: white; 
+                                        width: 32px; 
+                                        height: 32px; 
+                                        border-radius: 50%; 
+                                        display: flex; 
+                                        align-items: center; 
+                                        justify-content: center; 
+                                        font-weight: bold; 
+                                        margin-right: 15px;
+                                        font-size: 14px;
+                                    ">${index + 1}</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #333; font-size: 16px; margin-bottom: 2px;">
+                                            ${item.product_name}
+                                        </div>
+                                        <div style="color: #666; font-size: 13px;">
+                                            <i class="fas fa-tag" style="margin-right: 4px;"></i>
+                                            ${item.price.toLocaleString()} VNĐ × ${item.quantity}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="
+                                        background: #28a745; 
+                                        color: white; 
+                                        padding: 6px 12px; 
+                                        border-radius: 20px; 
+                                        font-weight: 600; 
+                                        font-size: 14px;
+                                        display: inline-block;
+                                    ">
+                                        ${item.subtotal.toLocaleString()} VNĐ
+                                    </div>
+                                </div>
+                            </div>
                         `;
-                        itemsTableBody.insertAdjacentHTML('beforeend', row);
+                        itemsList.insertAdjacentHTML('beforeend', itemCard);
                     });
-        
-                    adminPanel.openModal('viewOrderDetailsModal');
+                    
+                    // Add empty state if no items
+                    if (orderItems.length === 0) {
+                        itemsList.innerHTML = `
+                            <div class="order-items-empty">
+                                <i class="fas fa-box-open fa-3x" style="margin-bottom: 15px; color: #dee2e6;"></i>
+                                <p>{{ __('No items found in this order.') }}</p>
+                            </div>
+                        `;
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching order details:', error);
-                    alert('{{ __('Failed to load order details.') }}');
+                    
+                    const itemsList = document.getElementById('order_detail_items_list');
+                    itemsList.innerHTML = `
+                        <div class="order-items-empty">
+                            <i class="fas fa-exclamation-triangle fa-3x" style="margin-bottom: 15px; color: #dc3545;"></i>
+                            <p style="color: #dc3545;">{{ __('Failed to load order details.') }}</p>
+                            <button onclick="location.reload()" class="btn btn-secondary btn-sm" style="margin-top: 10px;">
+                                {{ __('Retry') }}
+                            </button>
+                        </div>
+                    `;
                 });
             });
         });

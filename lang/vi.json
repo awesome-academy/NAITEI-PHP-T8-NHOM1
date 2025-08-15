@@ -403,5 +403,16 @@
     "Stock": "Tồn Kho",
     "Available": "Có Sẵn",
     "Out of Stock": "Hết Hàng",
-    "Feedbacks": "Phản Hồi Khách Hàng"
+    "Feedbacks": "Phản Hồi Khách Hàng",
+    "From Date": "Từ Ngày",
+    "To Date": "Đến Ngày",
+    "Clear": "Xóa",
+    "Filtered results": "Kết quả đã lọc",
+    "orders found": "đơn hàng được tìm thấy",
+    "From": "Từ",
+    "To": "Đến",
+    "Customer Name": "Tên Khách Hàng",
+    "Current Status": "Trạng Thái Đơn Hàng",
+    "Order Items": "Mặt hàng trong đơn hàng",
+    "Unknown Status": "Trạng thái không xác định"
 }
