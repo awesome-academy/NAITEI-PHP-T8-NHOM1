@@ -261,6 +261,10 @@
             <div class="form-group">
                 <label class="form-label">{{ __('Image') }}</label>
                 <input type="file" name="image" class="form-control" accept="image/*">
+                <div id="edit_product_image_container" style="margin-top: 10px;">
+                    <img id="edit_product_image" src="" alt="Product Image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
+                    <p id="edit_no_image" style="color: #666; display: none;">{{ __('No image available') }}</p>
+                </div>
             </div>
             <div style="text-align: right; margin-top: 25px;">
                 <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('editProductModal')">{{ __('Cancel') }}</button>
@@ -377,20 +381,16 @@
                     <input type="text" id="order_detail_status" class="form-control" readonly>
                 </div>
             </div>
-            <h4>{{ __('Order Items') }}</h4>
-            <table class="table table-striped table-bordered" id="order_detail_items_table" style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Product') }}</th>
-                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Quantity') }}</th>
-                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Price') }}</th>
-                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">{{ __('Subtotal') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Order items will be loaded here by JS -->
-                </tbody>
-            </table>
+            <div class="order-items-section" style="margin-top: 20px;">
+                <h4 style="color: #333; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #007bff;">
+                    <i class="fas fa-box" style="margin-right: 8px; color: #007bff;"></i>
+                    {{ __('Order Items') }}
+                </h4>
+                <div class="order-items-container" style="background: #f8f9fa; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div id="order_detail_items_list">
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer" style="text-align: right; margin-top: 25px;">
             <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('viewOrderDetailsModal')">{{ __('Close') }}</button>

@@ -404,5 +404,16 @@
     "2-year warranty on all furniture items": "すべての家具アイテムに2年保証",
     "Stock": "在庫",
     "Available": "利用可能",
-    "Out of Stock": "在庫切れ"
+    "Out of Stock": "在庫切れ",
+    "From Date": "開始日",
+    "To Date": "終了日",
+    "Clear": "クリア",
+    "Filtered results": "フィルタリングされた結果",
+    "orders found": "見つかった注文",
+    "From": "から",
+    "To": "まで",
+    "Customer Name": "顧客名",
+    "Current Status": "現在のステータス",
+    "Order Items": "注文アイテム",
+    "Unknown Status": "不明なステータス"
 }

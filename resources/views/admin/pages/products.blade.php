@@ -88,6 +88,7 @@
                                     data-product-price="{{ $product->price }}"
                                     data-product-stock="{{ $product->stock }}"
                                     data-product-description="{{ $product->description ?? '' }}"
+                                    data-product-image="{{ $product->image ?? '' }}"
                                     onclick="editProductData(this)">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -167,6 +168,52 @@ function editProductData(button) {
     document.getElementById('edit_product_stock').value = data.productStock;
     document.getElementById('edit_product_description').value = data.productDescription;
     document.getElementById('editProductForm').action = `/admin/products/${data.productId}`;
+    
+    const editImageEl = document.getElementById('edit_product_image');
+    const editNoImageEl = document.getElementById('edit_no_image');
+    const fileInput = document.querySelector('#editProductModal input[name="image"]');
+    
+    // original image source (restore if no new image is selected)
+    let originalImageSrc = '';
+    
+    if (data.productImage && data.productImage !== '' && data.productImage !== 'null') {
+        originalImageSrc = '/' + data.productImage;
+        editImageEl.src = originalImageSrc;
+        editImageEl.style.display = 'block';
+        editNoImageEl.style.display = 'none';
+    } else {
+        editImageEl.style.display = 'none';
+        editNoImageEl.style.display = 'block';
+    }
+
+    // reset file input when opening modal
+    fileInput.value = '';
+    
+    fileInput.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    editImageEl.src = e.target.result;
+                    editImageEl.style.display = 'block';
+                    editNoImageEl.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                event.target.value = '';
+            }
+        } else {
+            if (originalImageSrc) {
+                editImageEl.src = originalImageSrc;
+                editImageEl.style.display = 'block';
+                editNoImageEl.style.display = 'none';
+            } else {
+                editImageEl.style.display = 'none';
+                editNoImageEl.style.display = 'block';
+            }
+        }
+    };
     
     adminPanel.openModal('editProductModal');
 }
