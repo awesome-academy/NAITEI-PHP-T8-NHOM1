@@ -77,10 +77,10 @@
             <div class="product-overlay">
                 <button class="add-to-cart-btn" data-url="{{ route('customer.cart.add', ['product' => $product]) }}">{{ __('Add to cart') }}</button>
                 <div class="product-actions">
-                    <button class="action-btn">
-                        <i class="fas fa-share-alt"></i>
-                        {{ __('Share') }}
-                    </button>
+                    <a href="{{ route('customer.feedbacks', $product->product_id) }}" class="action-btn">
+                        <i class="fas fa-comments"></i>
+                        {{ __('Feedback') }}
+                    </a>
                     <button class="action-btn">
                         <i class="fas fa-random"></i>
                         {{ __('Compare') }}

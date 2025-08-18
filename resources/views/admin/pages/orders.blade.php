@@ -123,6 +123,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div style="margin-top: 20px; display: flex; justify-content: center;">
+                {{ $orders->links('pagination.pagination') }}
+            </div>
         </div>
     </div>
 </div>

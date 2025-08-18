@@ -77,12 +77,21 @@
             <span>{{ __('Total') }}</span>
             <span>{{ number_format($totalPrice ?? 0, 0, '.', ',') }} {{ __('VND') }}</span>
         </div>
-        <form action="{{ route('customer.checkout.store') }}" method="POST" onsubmit="return confirmOrder()">
+        <form action="{{ route('customer.checkout.store') }}" method="POST" id="checkoutForm">
             @csrf
-            <button type="submit" class="btn-primary full">{{ __('Place Order') }}</button>
+            <button type="button" class="btn-primary full" onclick="showPlaceOrderModal()">{{ __('Place Order') }}</button>
         </form>
     </div>
 </div>
+
+@include('customer.components.modals', [
+    'modalId' => 'placeOrderModal',
+    'title' => 'Confirm Order',
+    'message' => 'Are you sure you want to place this order?',
+    'confirmText' => 'Place Order',
+    'cancelText' => 'Cancel',
+    'confirmClass' => 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+])
 @endsection
 
 @push('styles')
@@ -222,8 +231,13 @@
 @endpush
 @push('scripts')
 <script>
-function confirmOrder() {
-    return confirm('{{ __("Are you sure you want to place this order?") }}');
+function showPlaceOrderModal() {
+    document.getElementById('placeOrderModal').style.display = 'flex';
+    
+    const confirmBtn = document.getElementById('placeOrderModal_confirm');
+    confirmBtn.onclick = function() {
+        document.getElementById('checkoutForm').submit();
+    };
 }
 </script>
 @endpush

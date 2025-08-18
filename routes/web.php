@@ -8,6 +8,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FeedbackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,11 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
     // Checkout routes
     Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+    // Feedback routes
+    Route::get('/feedbacks/{product}', [FeedbackController::class, 'index'])->name('feedbacks');
+    Route::post('/feedbacks/{product}', [FeedbackController::class, 'store'])->name('feedbacks.store');
+    Route::delete('/feedbacks/{feedback}', [FeedbackController::class, 'destroy'])->name('feedbacks.destroy');
 });
 
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
@@ -75,6 +81,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status.update');
     Route::get('/orders/{order}/details', [AdminController::class, 'showOrderDetails'])->name('orders.details');
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('feedbacks');
+    Route::get('/feedbacks/{feedback}', [AdminController::class, 'showFeedback'])->name('feedbacks.show');
+    Route::delete('/feedbacks/{feedback}', [AdminController::class, 'deleteFeedback'])->name('feedbacks.delete');
 });
 
 Route::get('language/{lang}', [LanguageController::class, 'changeLanguage'])->name('locale');

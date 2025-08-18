@@ -37,10 +37,10 @@
                         <td>{{ Str::limit($feedback->comment, 50) }}</td>
                         <td>{{ $feedback->created_at ? $feedback->created_at->format('d/m/Y') : __('N/A') }}</td>
                         <td>
-                            <button class="btn btn-secondary btn-sm">
+                            <button class="btn btn-secondary btn-sm" onclick="viewFeedback({{ $feedback->feedback_id }})" title="{{ __('View Details') }}">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-danger btn-sm">
+                            <button class="btn btn-danger btn-sm" onclick="deleteFeedback({{ $feedback->feedback_id }})" title="{{ __('Delete') }}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -52,7 +52,102 @@
                     @endforelse
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div style="margin-top: 20px; display: flex; justify-content: center;">
+                {{ $feedbacks->links('pagination.pagination') }}
+            </div>
         </div>
-    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentFeedbackId = null;
+
+    window.viewFeedback = function(feedbackId) {
+        fetch(`{{ route('admin.feedbacks.show', ':id') }}`.replace(':id', feedbackId))
+            .then(response => response.json())
+            .then(data => {
+                const feedback = data.feedback;
+                const user = data.user;
+                const product = data.product;
+                
+                document.getElementById('feedback-customer').textContent = user ? user.name : '{{ __("N/A") }}';
+                document.getElementById('feedback-product').textContent = product ? product.name : '{{ __("N/A") }}';
+                document.getElementById('feedback-comment').textContent = feedback.comment;
+                document.getElementById('feedback-date').textContent = new Date(feedback.created_at).toLocaleDateString();
+                
+                let ratingHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= feedback.rating) {
+                        ratingHtml += '<i class="fas fa-star" style="color: #ffc107; margin-right: 2px;"></i>';
+                    } else {
+                        ratingHtml += '<i class="far fa-star" style="color: #ccc; margin-right: 2px;"></i>';
+                    }
+                }
+                ratingHtml += ` (${feedback.rating}/5)`;
+                document.getElementById('feedback-rating').innerHTML = ratingHtml;
+                
+                adminPanel.openModal('viewFeedbackModal');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('{{ __("Error loading feedback details") }}');
+            });
+    };
+
+    window.deleteFeedback = function(feedbackId) {
+        currentFeedbackId = feedbackId;
+        
+        fetch(`{{ route('admin.feedbacks.show', ':id') }}`.replace(':id', feedbackId))
+            .then(response => response.json())
+            .then(data => {
+                const feedback = data.feedback;
+                const user = data.user;
+                const product = data.product;
+                
+                let previewHtml = `
+                    <strong>{{ __('Customer') }}:</strong> ${user ? user.name : '{{ __("N/A") }}'}<br>
+                    <strong>{{ __('Product') }}:</strong> ${product ? product.name : '{{ __("N/A") }}'}<br>
+                    <strong>{{ __('Comment') }}:</strong> ${feedback.comment.length > 100 ? feedback.comment.substring(0, 100) + '...' : feedback.comment}
+                `;
+                
+                document.getElementById('delete-feedback-preview').innerHTML = previewHtml;
+                adminPanel.openModal('deleteFeedbackModal');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('{{ __("Error loading feedback details") }}');
+            });
+    };
+    
+    const feedbackDeleteBaseUrl = "{{ url('admin/feedbacks') }}";
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'confirmDeleteFeedback') {
+            if (currentFeedbackId) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = feedbackDeleteBaseUrl + '/' + currentFeedbackId;
+                
+                // CSRF
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = csrfToken;
+                form.appendChild(tokenInput);
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                form.appendChild(methodInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    });
+});
+</script>
 @endsection
