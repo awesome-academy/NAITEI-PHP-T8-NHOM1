@@ -318,15 +318,31 @@ class AdminController extends Controller
         }
 
         // Order by most recent first
-        $orders = $query->orderBy('order_date', 'desc')->get();
+        $orders = $query->orderBy('order_date', 'desc')->paginate(10);
 
         return view('admin.pages.orders', compact('orders'));
     }
 
     public function feedbacks()
     {
-        $feedbacks = Feedback::with('user', 'product')->get();
+        $feedbacks = Feedback::with('user', 'product')->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.pages.feedbacks', compact('feedbacks'));
+    }
+
+    public function showFeedback(Feedback $feedback)
+    {
+        $feedback->load('user', 'product');
+        return response()->json([
+            'feedback' => $feedback,
+            'user' => $feedback->user,
+            'product' => $feedback->product
+        ]);
+    }
+
+    public function deleteFeedback(Feedback $feedback)
+    {
+        $feedback->delete();
+        return redirect()->route('admin.feedbacks')->with('success', 'Feedback deleted successfully!');
     }
 
     public function updateOrderStatus(Request $request, Order $order)

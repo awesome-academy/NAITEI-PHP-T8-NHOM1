@@ -397,3 +397,61 @@
         </div>
     </div>
 </div>
+
+<!-- View Feedback Modal -->
+<div class="modal" id="viewFeedbackModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Feedback Details') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('viewFeedbackModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Customer') }}</label>
+                    <div class="form-control-static" id="feedback-customer"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Product') }}</label>
+                    <div class="form-control-static" id="feedback-product"></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Rating') }}</label>
+                    <div class="form-control-static" id="feedback-rating"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Date') }}</label>
+                    <div class="form-control-static" id="feedback-date"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ __('Comment') }}</label>
+                <div class="form-control-static feedback-comment-display" id="feedback-comment"></div>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; margin-top: 25px;">
+            <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('viewFeedbackModal')">{{ __('Close') }}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Feedback Modal -->
+<div class="modal" id="deleteFeedbackModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{{ __('Confirm Delete') }}</h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('deleteFeedbackModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>{{ __('Are you sure you want to delete this feedback? This action cannot be undone.') }}</p>
+            <div class="feedback-preview" id="delete-feedback-preview">
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; margin-top: 25px;">
+            <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('deleteFeedbackModal')">{{ __('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteFeedback">{{ __('Delete') }}</button>
+        </div>
+    </div>
+</div>

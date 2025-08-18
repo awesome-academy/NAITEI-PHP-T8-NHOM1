@@ -715,40 +715,219 @@ select.form-control:focus {
     to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Feedback */
+.feedback-admin-container {
+    padding: 20px;
+}
+
+.feedback-table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.feedback-no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.feedback-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.feedback-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.feedback-star-filled {
+    color: #ffc107;
+    font-size: 14px;
+}
+
+.feedback-star-empty {
+    color: #ccc;
+    font-size: 14px;
+}
+
+/* Feedback Modal */
+.form-control-static {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    min-height: 38px;
+    color: #495057;
+}
+
+.form-control-static:not(:last-child) {
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
+.feedback-comment-display {
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f8f9fa;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #495057;
+}
+
+.feedback-preview {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #dc3545;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+}
+
+.feedback-preview strong {
+    color: #212529;
+    font-weight: 600;
+}
+
+.feedback-preview .feedback-rating {
+    margin: 8px 0;
+}
+
+.feedback-preview .feedback-rating .fas.fa-star {
+    color: #ffc107;
+    margin-right: 2px;
+}
+
+.feedback-preview .feedback-rating .far.fa-star {
+    color: #ccc;
+    margin-right: 2px;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+    background: linear-gradient(135deg, #138496, #117a8b);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-info:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.2);
+}
+
+.data-table tbody tr:hover .btn-info,
+.data-table tbody tr:hover .btn-danger {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+#viewFeedbackModal .modal-content {
+    max-width: 650px;
+    width: 90vw;
+}
+
+#deleteFeedbackModal .modal-content {
+    max-width: 500px;
+    width: 90vw;
+}
+
 @media (max-width: 768px) {
-    .sidebar {
-        width: 70px;
-        padding: 20px 5px;
+    .feedback-admin-container {
+        padding: 15px;
     }
-
-    .sidebar-header .logo span,
-    .admin-label,
-    .menu-item span {
-        display: none;
+    
+    .feedback-table-container {
+        border-radius: 10px;
     }
-
-    .main-content {
-        margin-left: 70px;
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 6px;
+        font-size: 12px;
     }
-
-    .header {
-        padding: 15px 20px;
+    
+    .btn-info,
+    .btn-danger {
+        padding: 4px 8px;
+        font-size: 11px;
     }
-
-    .header h1 {
-        font-size: 24px;
+    
+    .feedback-comment-display {
+        max-height: 150px;
+        padding: 8px;
+        font-size: 13px;
     }
-
-    .content-section {
-        padding: 20px;
+    
+    .feedback-preview {
+        padding: 8px;
+        font-size: 13px;
     }
+}
 
-    .stats-grid {
-        grid-template-columns: 1fr;
+@media (max-width: 576px) {
+    .data-table {
+        font-size: 11px;
     }
-
-    .form-row {
-        grid-template-columns: 1fr;
+    
+    .data-table th,
+    .data-table td {
+        padding: 6px 4px;
+    }
+    
+    .btn-info,
+    .btn-danger {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+    
+    .btn-info i,
+    .btn-danger i {
+        font-size: 10px;
+    }
+    
+    #viewFeedbackModal .modal-content,
+    #deleteFeedbackModal .modal-content {
+        width: 95vw;
+        margin: 20px auto;
     }
 }
