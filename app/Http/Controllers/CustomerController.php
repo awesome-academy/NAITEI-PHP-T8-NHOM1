@@ -59,15 +59,15 @@ class CustomerController extends Controller
         // Get orders with their items and status history
         $orders = Order::with(['orderItems.product', 'statusOrders'])
                       ->where('customer_id', $customer->id)
-                      ->orderBy('order_date', 'desc');            
+                      ->orderBy('created_at', 'desc');            
         $orders = Order::with([
             'orderItems.product' => function ($query) {
-                $query->select('id', 'name', 'price'); // Add other needed columns here
+                $query->select('product_id', 'name', 'price'); // Add other needed columns here
             },
             'statusOrders'
         ])
         ->where('customer_id', $customer->id)
-        ->orderBy('order_date', 'desc')
+        ->orderBy('created_at', 'desc')
         ->paginate(10);
 
         
@@ -83,9 +83,68 @@ class CustomerController extends Controller
         
         // Get specific order with all related data
         $order = Order::with(['orderItems.product', 'statusOrders.admin', 'user'])
-                     ->where('order_id', $orderId)
-                     ->where('customer_id', $customer->id);
+              ->where('customer_id', $customer->id)
+              ->findOrFail($orderId);
         
         return view('customer.pages.order-details', compact('order'));
+    }
+
+    public function cancelOrder($orderId, Request $request)
+    {
+        $customer = Auth::user();
+        
+        $order = Order::where('customer_id', $customer->id)
+                     ->where('order_id', $orderId)
+                     ->first();
+        
+        if (!$order) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Order not found')
+                ], 404);
+            }
+            return redirect()->route('customer.orders')->with('error', __('Order not found'));
+        }
+        
+        // Check if order can be cancelled
+        if (!in_array($order->status, ['pending', 'confirmed'])) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('This order cannot be cancelled')
+                ], 400);
+            }
+            return redirect()->route('customer.orders.details', $orderId)->with('error', __('This order cannot be cancelled'));
+        }
+        
+        try {
+            // Update order status to cancelled
+            $order->update(['status' => 'cancelled']);
+            
+            // Add status history
+            $order->statusOrders()->create([
+                'action_type' => 'cancelled',
+                'date' => now(),
+                'admin_id' => null
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('Order has been cancelled successfully')
+                ]);
+            }
+            return redirect()->route('customer.orders.details', $orderId)->with('success', __('Order has been cancelled successfully'));
+            
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('An error occurred while cancelling the order')
+                ], 500);
+            }
+            return redirect()->route('customer.orders.details', $orderId)->with('error', __('An error occurred while cancelling the order'));
+        }
     }
 }
