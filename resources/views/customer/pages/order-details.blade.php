@@ -19,6 +19,19 @@
 
 @section('content')
 <div class="order-details-container">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Order Header Info -->
     <div class="order-info-section">
         <div class="order-info-card">
@@ -140,6 +153,13 @@
             {{ __('Cancel Order') }}
         </button>
         @endif
+        
+        @if($order->status === 'cancelled')
+        <div class="order-cancelled-notice">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ __('This order has been cancelled') }}
+        </div>
+        @endif
     </div>
 </div>
 
@@ -162,6 +182,25 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
+}
+
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
 /* Order Info Section */
@@ -213,6 +252,36 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-confirmed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-processing {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-shipped {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-delivered {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 /* Status Timeline */
@@ -432,6 +501,18 @@
     background: #c82333;
 }
 
+.order-cancelled-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #f8d7da;
+    color: #721c24;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
 /* Modal */
 .modal-overlay {
     position: fixed;
@@ -521,6 +602,8 @@
 
 @push('scripts')
 <script>
+let isProcessing = false;
+
 function confirmCancel() {
     document.getElementById('cancelModal').style.display = 'flex';
 }
@@ -530,9 +613,50 @@ function closeCancelModal() {
 }
 
 function cancelOrder() {
-    // Here you would implement the cancel order functionality
-    alert('{{ __("Order cancellation functionality would be implemented here") }}');
-    closeCancelModal();
+    if (isProcessing) return;
+    isProcessing = true;
+    
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!token) {
+        alert('{{ __("Security token not found. Please refresh the page.") }}');
+        isProcessing = false;
+        return;
+    }
+
+    const cancelButton = document.querySelector('.btn-danger');
+    const originalText = cancelButton.textContent;
+    cancelButton.textContent = '{{ __("Cancelling...") }}';
+    cancelButton.disabled = true;
+
+    const formData = new FormData();
+    formData.append('_token', token);
+
+    fetch(`{{ route('customer.orders.cancel', $order->order_id) }}`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.message || '{{ __("An error occurred while cancelling the order!") }}');
+        }
+    })
+    .catch(error => {
+        alert('{{ __("An error occurred while cancelling the order!") }}');
+    })
+    .finally(() => {
+        cancelButton.textContent = originalText;
+        cancelButton.disabled = false;
+        isProcessing = false;
+        closeCancelModal();
+    });
 }
 </script>
 @endpush

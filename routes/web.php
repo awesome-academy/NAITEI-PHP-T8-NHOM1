@@ -41,6 +41,7 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
     Route::get('/products/{category}', [CustomerController::class, 'products'])->name('products');
     Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
     Route::get('/orders/{order}', [CustomerController::class, 'orderDetails'])->name('orders.details');
+    Route::post('/orders/{order}/cancel', [CustomerController::class, 'cancelOrder'])->name('orders.cancel');
     Route::get('/about', [CustomerController::class, 'about'])->name('about');
     Route::get('/contact', [CustomerController::class, 'contact'])->name('contact');
 

@@ -38,9 +38,8 @@
                             $latestStatus = $order->statusOrders->last();
                             $statusClass = match($order->status ?? 'pending') {
                                 'pending' => 'status-pending',
-                                'confirmed' => 'status-confirmed', 
-                                'processing' => 'status-processing',
-                                'shipped' => 'status-shipped',
+                                'approved' => 'status-approved',
+                                'rejected' => 'status-rejected',
                                 'delivered' => 'status-delivered',
                                 'cancelled' => 'status-cancelled',
                                 default => 'status-pending'
@@ -202,29 +201,24 @@
     color: #F57C00;
 }
 
-.status-confirmed {
-    background: #E3F2FD;
-    color: #1976D2;
+.status-approved {
+    background: #d1ecf1;
+    color: #0c5460;
 }
 
-.status-processing {
-    background: #F3E5F5;
-    color: #7B1FA2;
-}
-
-.status-shipped {
-    background: #E8F5E8;
-    color: #388E3C;
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 .status-delivered {
     background: #E8F5E8;
-    color: #2E7D32;
+    color: #155724;
 }
 
 .status-cancelled {
-    background: #FFEBEE;
-    color: #D32F2F;
+    background: #e2e3e5;
+    color: #383d41;
 }
 
 /* Order Summary */
