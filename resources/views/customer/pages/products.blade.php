@@ -73,9 +73,18 @@
             @if(!empty($product->is_new))
                 <span class="product-badge new">New</span>
             @endif
+            @if($product->stock <= 0)
+                <span class="product-badge out-of-stock">{{ __('Out of Stock') }}</span>
+            @elseif($product->stock <= 5)
+                <span class="product-badge low-stock">{{ __('Low Stock') }}</span>
+            @endif
             
             <div class="product-overlay">
-                <button class="add-to-cart-btn" data-url="{{ route('customer.cart.add', ['product' => $product]) }}">{{ __('Add to cart') }}</button>
+                @if($product->stock > 0)
+                    <button class="add-to-cart-btn" data-url="{{ route('customer.cart.add', ['product' => $product]) }}">{{ __('Add to cart') }}</button>
+                @else
+                    <button class="add-to-cart-btn disabled" disabled>{{ __('Out of Stock') }}</button>
+                @endif
                 <div class="product-actions">
                     <a href="{{ route('customer.feedbacks', $product->product_id) }}" class="action-btn">
                         <i class="fas fa-comments"></i>
@@ -100,6 +109,13 @@
                 <span class="current-price">{{ number_format($product->price, 0, '.', ',') }} {{ __('VND') }}</span>
                 @if($loop->index % 3 == 0)
                     <span class="original-price">{{ number_format($product->price * 1.3, 0, '.', ',') }} {{ __('VND') }}</span>
+                @endif
+            </div>
+            <div class="stock-info">
+                @if($product->stock > 0)
+                    <span class="stock-available">{{ __('In Stock') }}: {{ $product->stock }}</span>
+                @else
+                    <span class="stock-out">{{ __('Out of Stock') }}</span>
                 @endif
             </div>
         </div>
@@ -187,6 +203,16 @@
     color: white;
 }
 
+.product-badge.out-of-stock {
+    background: #E74C3C;
+    color: white;
+}
+
+.product-badge.low-stock {
+    background: #F39C12;
+    color: white;
+}
+
 .product-overlay {
     position: absolute;
     top: 0;
@@ -220,6 +246,16 @@
 
 .add-to-cart-btn:hover {
     background: #A67F2A;
+}
+
+.add-to-cart-btn.disabled {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.add-to-cart-btn.disabled:hover {
+    background: #ccc;
 }
 
 .product-actions {
@@ -303,6 +339,23 @@
 
 .back-btn:hover {
     background: #A67F2A;
+}
+
+/* Stock Info */
+.stock-info {
+    margin-top: 10px;
+}
+
+.stock-available {
+    color: #27AE60;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stock-out {
+    color: #E74C3C;
+    font-size: 12px;
+    font-weight: 500;
 }
 </style>
 @endpush
