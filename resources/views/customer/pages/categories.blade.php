@@ -19,23 +19,30 @@
 <!-- Filter Bar -->
 <div class="filter-bar">
     <div class="filter-left">
-        <button class="filter-btn">
-            <i class="fas fa-filter"></i>
-            {{ __('Filter') }}
-        </button>
-        
-        <div class="view-options">
-            <button class="view-btn active">
-                <i class="fas fa-th-large"></i>
-            </button>
-            <button class="view-btn">
-                <i class="fas fa-list"></i>
-            </button>
-        </div>
+        <form method="GET" action="{{ route('customer.categories') }}" class="search-form">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" 
+                       name="search" 
+                       value="{{ request('search') }}" 
+                       placeholder="{{ __('Search categories...') }}"
+                       class="search-input">
+                @if(request('sort'))
+                    <input type="hidden" name="sort" value="{{ request('sort') }}">
+                @endif
+                <button type="submit" class="search-btn">{{ __('Search') }}</button>
+            </div>
+        </form>
     </div>
     
     <div class="filter-right">
-        <span class="showing-text">{{ __('Showing') }} 1-{{ $categories->count() }} {{ __('of') }} {{ $categories->count() }} {{ __('categories') }}</span>
+        <span class="showing-text">
+            @if(request('search'))
+                {{ __('Found') }} {{ $categories->count() }} {{ __('categories for') }} "{{ request('search') }}"
+            @else
+                {{ __('Showing') }} 1-{{ $categories->count() }} {{ __('of') }} {{ $categories->count() }} {{ __('categories') }}
+            @endif
+        </span>
         
         <div style="display: flex; gap: 15px; align-items: center;">
             <label>{{ __('Show') }}</label>
@@ -46,12 +53,20 @@
             </select>
             
             <label>{{ __('Sort by') }}</label>
-            <select class="sort-select">
-                <option>{{ __('Default') }}</option>
-                <option>{{ __('Name A-Z') }}</option>
-                <option>{{ __('Name Z-A') }}</option>
-                <option>{{ __('Products Count') }}</option>
+            <select class="sort-select" onchange="this.form.submit()" form="sort-form">
+                <option value="" {{ !request('sort') ? 'selected' : '' }}>{{ __('Default') }}</option>
+                <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>{{ __('Name A-Z') }}</option>
+                <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>{{ __('Name Z-A') }}</option>
+                <option value="products_asc" {{ request('sort') == 'products_asc' ? 'selected' : '' }}>{{ __('Products Count (Low-High)') }}</option>
+                <option value="products_desc" {{ request('sort') == 'products_desc' ? 'selected' : '' }}>{{ __('Products Count (High-Low)') }}</option>
             </select>
+            
+            <form id="sort-form" method="GET" action="{{ route('customer.categories') }}" style="display: none;">
+                @if(request('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                <input type="hidden" name="sort" id="sort-input">
+            </form>
         </div>
     </div>
 </div>
@@ -226,5 +241,121 @@
     color: white;
     border-color: #B88E2F;
 }
+
+/* Filter Bar */
+.filter-bar {
+    background: #F9F1E7;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.filter-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex: 1;
+}
+
+.search-form {
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #666;
+    z-index: 2;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 15px 12px 40px;
+    font-size: 14px;
+    border-radius: 8px 0 0 8px;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-btn {
+    background: #B88E2F;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.search-btn:hover {
+    background: #A67F2A;
+}
+
+.filter-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.showing-text {
+    color: #666;
+    font-size: 14px;
+}
+
+.show-select, .sort-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
 </style>
 @endpush
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Sort functionality
+    const sortSelect = document.querySelector('.sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const sortValue = this.value;
+            const sortInput = document.getElementById('sort-input');
+            if (sortInput) {
+                sortInput.value = sortValue;
+                document.getElementById('sort-form').submit();
+            }
+        });
+    }
+
+    // Search form auto-submit on Enter
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.closest('form').submit();
+            }
+        });
+    }
+});
+</script>
+@endsection
