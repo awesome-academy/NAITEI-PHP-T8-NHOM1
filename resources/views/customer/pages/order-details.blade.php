@@ -259,7 +259,11 @@
     color: #856404;
 }
 
+<<<<<<< HEAD
 .status-confirmed {
+=======
+.status-approved {
+>>>>>>> bb61385 (Update Readme.md)
     background: #d1ecf1;
     color: #0c5460;
 }
