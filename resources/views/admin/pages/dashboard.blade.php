@@ -78,5 +78,59 @@
             </div>
         </div>
     </div>
+    
+    <div class="charts-section">
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>{{ __('Active Users') }}</h3>
+                    <p class="chart-subtitle">{{ __('Users who placed orders or gave feedback') }}</p>
+                </div>
+                <canvas id="activeUsersChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>{{ __('Products Ordered') }}</h3>
+                    <p class="chart-subtitle">{{ __('Total quantity of products ordered') }}</p>
+                </div>
+                <canvas id="orderedProductsChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>{{ __('New Orders') }}</h3>
+                    <p class="chart-subtitle">{{ __('Number of new orders created') }}</p>
+                </div>
+                <canvas id="newOrdersChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>{{ __('Customer Feedback') }}</h3>
+                    <p class="chart-subtitle">{{ __('Number of new feedback received') }}</p>
+                </div>
+                <canvas id="newFeedbacksChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const TIMEOUT_MS = 200;
+document.addEventListener('DOMContentLoaded', function() {
+    function initCharts() {
+        if (typeof Chart !== 'undefined' && typeof window.loadWeeklyCharts === 'function') {
+            window.loadWeeklyCharts();
+        } else {
+            setTimeout(initCharts, TIMEOUT_MS);
+        }
+    }
+    
+    initCharts();
+});
+</script>
+@endpush
 @endsection

@@ -21,40 +21,67 @@
 <!-- Filter Bar -->
 <div class="filter-bar">
     <div class="filter-left">
-        <button class="filter-btn">
-            <i class="fas fa-filter"></i>
-            {{ __('Filter') }}
-        </button>
-        
-        <div class="view-options">
-            <button class="view-btn active">
-                <i class="fas fa-th-large"></i>
-            </button>
-            <button class="view-btn">
-                <i class="fas fa-list"></i>
-            </button>
-        </div>
+        <form method="GET" action="{{ route('customer.products', $category->category_id) }}" class="search-form">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" 
+                       name="search" 
+                       value="{{ request('search') }}" 
+                       placeholder="{{ __('Search products...') }}"
+                       class="search-input">
+                @if(request('sort'))
+                    <input type="hidden" name="sort" value="{{ request('sort') }}">
+                @endif
+                @if(request('price_range'))
+                    <input type="hidden" name="price_range" value="{{ request('price_range') }}">
+                @endif
+                <button type="submit" class="search-btn">{{ __('Search') }}</button>
+            </div>
+        </form>
     </div>
     
     <div class="filter-right">
-        <span class="showing-text">{{ __('Showing') }} 1-{{ $products->count() }} {{ __('of') }} {{ $products->count() }} {{ __('products') }}</span>
+        <span class="showing-text">
+            @if(request('search'))
+                {{ __('Found') }} {{ $products->count() }} {{ __('products for') }} "{{ request('search') }}"
+            @else
+                {{ __('Showing') }} 1-{{ $products->count() }} {{ __('of') }} {{ $products->count() }} {{ __('products') }}
+            @endif
+        </span>
         
         <div style="display: flex; gap: 15px; align-items: center;">
-            <label>{{ __('Show') }}</label>
-            <select class="show-select">
-                <option>16</option>
-                <option>32</option>
-                <option>48</option>
+            <label>{{ __('Price Range') }}</label>
+            <select class="price-select" onchange="this.form.submit()" form="filter-form">
+                <option value="" {{ !request('price_range') ? 'selected' : '' }}>{{ __('All Prices') }}</option>
+                <option value="under_1m" {{ request('price_range') == 'under_1m' ? 'selected' : '' }}>{{ __('Under 1M VND') }}</option>
+                <option value="1m_2m" {{ request('price_range') == '1m_2m' ? 'selected' : '' }}>{{ __('1M - 2M VND') }}</option>
+                <option value="2m_3m" {{ request('price_range') == '2m_3m' ? 'selected' : '' }}>{{ __('2M - 3M VND') }}</option>
+                <option value="3m_4m" {{ request('price_range') == '3m_4m' ? 'selected' : '' }}>{{ __('3M - 4M VND') }}</option>
+                <option value="4m_5m" {{ request('price_range') == '4m_5m' ? 'selected' : '' }}>{{ __('4M - 5M VND') }}</option>
+                <option value="5m_6m" {{ request('price_range') == '5m_6m' ? 'selected' : '' }}>{{ __('5M - 6M VND') }}</option>
+                <option value="6m_7m" {{ request('price_range') == '6m_7m' ? 'selected' : '' }}>{{ __('6M - 7M VND') }}</option>
+                <option value="7m_8m" {{ request('price_range') == '7m_8m' ? 'selected' : '' }}>{{ __('7M - 8M VND') }}</option>
+                <option value="8m_9m" {{ request('price_range') == '8m_9m' ? 'selected' : '' }}>{{ __('8M - 9M VND') }}</option>
+                <option value="9m_10m" {{ request('price_range') == '9m_10m' ? 'selected' : '' }}>{{ __('9M - 10M VND') }}</option>
+                <option value="over_10m" {{ request('price_range') == 'over_10m' ? 'selected' : '' }}>{{ __('Over 10M VND') }}</option>
             </select>
             
             <label>{{ __('Sort by') }}</label>
-            <select class="sort-select">
-                <option>{{ __('Default') }}</option>
-                <option>{{ __('Price Low-High') }}</option>
-                <option>{{ __('Price High-Low') }}</option>
-                <option>{{ __('Name A-Z') }}</option>
-                <option>{{ __('Name Z-A') }}</option>
+            <select class="sort-select" onchange="this.form.submit()" form="filter-form">
+                <option value="" {{ !request('sort') ? 'selected' : '' }}>{{ __('Default') }}</option>
+                <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>{{ __('Price Low-High') }}</option>
+                <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>{{ __('Price High-Low') }}</option>
+                <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>{{ __('Name A-Z') }}</option>
+                <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>{{ __('Name Z-A') }}</option>
             </select>
+            
+            <form id="filter-form" method="GET" action="{{ route('customer.products', $category->category_id) }}" style="display: none;">
+                @if(request('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                <input type="hidden" name="sort" id="sort-input">
+                <input type="hidden" name="price_range" id="price-input">
+            </form>
         </div>
     </div>
 </div>
@@ -73,9 +100,18 @@
             @if(!empty($product->is_new))
                 <span class="product-badge new">New</span>
             @endif
+            @if($product->stock <= 0)
+                <span class="product-badge out-of-stock">{{ __('Out of Stock') }}</span>
+            @elseif($product->stock <= 5)
+                <span class="product-badge low-stock">{{ __('Low Stock') }}</span>
+            @endif
             
             <div class="product-overlay">
-                <button class="add-to-cart-btn" data-url="{{ route('customer.cart.add', ['product' => $product]) }}">{{ __('Add to cart') }}</button>
+                @if($product->stock > 0)
+                    <button class="add-to-cart-btn" data-url="{{ route('customer.cart.add', ['product' => $product]) }}">{{ __('Add to cart') }}</button>
+                @else
+                    <button class="add-to-cart-btn disabled" disabled>{{ __('Out of Stock') }}</button>
+                @endif
                 <div class="product-actions">
                     <a href="{{ route('customer.feedbacks', $product->product_id) }}" class="action-btn">
                         <i class="fas fa-comments"></i>
@@ -100,6 +136,13 @@
                 <span class="current-price">{{ number_format($product->price, 0, '.', ',') }} {{ __('VND') }}</span>
                 @if($loop->index % 3 == 0)
                     <span class="original-price">{{ number_format($product->price * 1.3, 0, '.', ',') }} {{ __('VND') }}</span>
+                @endif
+            </div>
+            <div class="stock-info">
+                @if($product->stock > 0)
+                    <span class="stock-available">{{ __('In Stock') }}: {{ $product->stock }}</span>
+                @else
+                    <span class="stock-out">{{ __('Out of Stock') }}</span>
                 @endif
             </div>
         </div>
@@ -187,6 +230,16 @@
     color: white;
 }
 
+.product-badge.out-of-stock {
+    background: #E74C3C;
+    color: white;
+}
+
+.product-badge.low-stock {
+    background: #F39C12;
+    color: white;
+}
+
 .product-overlay {
     position: absolute;
     top: 0;
@@ -220,6 +273,16 @@
 
 .add-to-cart-btn:hover {
     background: #A67F2A;
+}
+
+.add-to-cart-btn.disabled {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.add-to-cart-btn.disabled:hover {
+    background: #ccc;
 }
 
 .product-actions {
@@ -304,6 +367,113 @@
 .back-btn:hover {
     background: #A67F2A;
 }
+
+/* Stock Info */
+.stock-info {
+    margin-top: 10px;
+}
+
+.stock-available {
+    color: #27AE60;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stock-out {
+    color: #E74C3C;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Filter Bar */
+.filter-bar {
+    background: #F9F1E7;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.filter-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex: 1;
+}
+
+.search-form {
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #666;
+    z-index: 2;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 15px 12px 40px;
+    font-size: 14px;
+    border-radius: 8px 0 0 8px;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-btn {
+    background: #B88E2F;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.search-btn:hover {
+    background: #A67F2A;
+}
+
+
+
+.filter-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.showing-text {
+    color: #666;
+    font-size: 14px;
+}
+
+.show-select, .sort-select, .price-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    min-width: 120px;
+}
 </style>
 @endpush
 
@@ -357,6 +527,42 @@ document.addEventListener('DOMContentLoaded', function () {
             form.submit();
         });
     });
+
+    // Sort functionality
+    const sortSelect = document.querySelector('.sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const sortValue = this.value;
+            const sortInput = document.getElementById('sort-input');
+            if (sortInput) {
+                sortInput.value = sortValue;
+                document.getElementById('filter-form').submit();
+            }
+        });
+    }
+
+    // Price filter functionality
+    const priceSelect = document.querySelector('.price-select');
+    if (priceSelect) {
+        priceSelect.addEventListener('change', function() {
+            const priceValue = this.value;
+            const priceInput = document.getElementById('price-input');
+            if (priceInput) {
+                priceInput.value = priceValue;
+                document.getElementById('filter-form').submit();
+            }
+        });
+    }
+
+    // Search form auto-submit on Enter
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.closest('form').submit();
+            }
+        });
+    }
 });
 </script>
 @endsection

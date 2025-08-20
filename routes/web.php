@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
     Route::get('/categories', [CustomerController::class, 'categories'])->name('categories');
     Route::get('/products/{category}', [CustomerController::class, 'products'])->name('products');
+    Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
+    Route::get('/orders/{order}', [CustomerController::class, 'orderDetails'])->name('orders.details');
+    Route::post('/orders/{order}/cancel', [CustomerController::class, 'cancelOrder'])->name('orders.cancel');
     Route::get('/about', [CustomerController::class, 'about'])->name('about');
     Route::get('/contact', [CustomerController::class, 'contact'])->name('contact');
 
@@ -63,6 +66,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.alt');
     Route::get('/dashboard/stats', [AdminController::class, 'dashboardStats'])->name('dashboard.stats');
+    Route::get('/dashboard/weekly-chart', [AdminController::class, 'getWeeklyChartData'])->name('dashboard.weekly-chart');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
