@@ -29,14 +29,14 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'check.user.activation'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Customer routes - require authentication
-Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
+Route::middleware(['auth', 'check.user.activation'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/categories', [CustomerController::class, 'categories'])->name('categories');
     Route::get('/products/{category}', [CustomerController::class, 'products'])->name('products');
     Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
@@ -62,7 +62,7 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
     Route::delete('/feedbacks/{feedback}', [FeedbackController::class, 'destroy'])->name('feedbacks.destroy');
 });
 
-Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['admin', 'check.user.activation'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.alt');
     Route::get('/dashboard/stats', [AdminController::class, 'dashboardStats'])->name('dashboard.stats');
@@ -71,6 +71,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::post('/users/{user}/toggle-activation', [AdminController::class, 'toggleUserActivation'])->name('users.toggle-activation');
     Route::get('/users/search', [AdminController::class, 'searchUsers'])->name('users.search');
     Route::get('/categories', [AdminController::class, 'categories'])->name('categories');
     Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');

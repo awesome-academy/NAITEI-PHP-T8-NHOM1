@@ -2,6 +2,15 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <!-- Account Deactivation -->
+    @if (session('error'))
+        <div>
+            <script>
+                alert("{!! addslashes(session('error')) !!}");
+            </script>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('login') }}">
         @csrf
 

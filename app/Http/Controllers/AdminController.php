@@ -126,13 +126,6 @@ class AdminController extends Controller
     public function updateUser(UpdateUserRequest $request, User $user)
     {
         $validated = $request->validated();
-
-        if ($request->filled('password')) {
-            $validated['password'] = bcrypt($validated['password']);
-        } else {
-            unset($validated['password']); // bỏ qua nếu không cập nhật password
-        }
-
         $user->update($validated);
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
     }
@@ -144,6 +137,14 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Cannot delete your own account.'
+            ], 403);
+        }
+
+        // only allow deletion of deactivated users
+        if ($user->is_activate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete active users. Please deactivate the user first.'
             ], 403);
         }
 
@@ -435,6 +436,35 @@ class AdminController extends Controller
                     'subtotal' => $item->quantity * $item->price,
                 ];
             }),
+        ]);
+    }
+
+    public function toggleUserActivation(User $user)
+    {
+        // if the user is the currently logged in user, prevent deactivation
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot deactivate your own account.'
+            ], 403);
+        }
+
+        // only allow super admin to toggle other admins
+        if ($user->role_id == ROLE::ADMIN && auth()->user()->email !== 'admin1@gmail.com') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the super admin can deactivate other admin accounts.'
+            ], 403);
+        }
+
+        $user->is_activate = !$user->is_activate;
+        $user->save();
+
+        $status = $user->is_activate ? 'activated' : 'deactivated';
+        return response()->json([
+            'success' => true,
+            'message' => "User has been {$status} successfully.",
+            'is_activate' => $user->is_activate
         ]);
     }
 }
