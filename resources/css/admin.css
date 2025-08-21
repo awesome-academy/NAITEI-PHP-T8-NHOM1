@@ -324,6 +324,76 @@ body {
 .stat-change.positive { color: #28a745; }
 .stat-change.negative { color: #dc3545; }
 
+.charts-section {
+    margin-top: 40px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.chart-container {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid #B88E2F;
+}
+
+.chart-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.chart-container:nth-child(1) { border-top-color: #B88E2F; }
+.chart-container:nth-child(2) { border-top-color: #28a745; }
+.chart-container:nth-child(3) { border-top-color: #17a2b8; }
+.chart-container:nth-child(4) { border-top-color: #fd7e14; }
+
+.chart-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.chart-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.chart-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+    font-style: italic;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 300px !important;
+    max-height: 300px;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .chart-container {
+        padding: 20px;
+    }
+    
+    .chart-container canvas {
+        height: 250px !important;
+    }
+}
+
 /* Data Tables */
 .table-container {
     background: white;

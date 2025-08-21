@@ -8,6 +8,192 @@ class AdminPanel {
         this.updateStats();
     }
 
+    loadWeeklyCharts() {
+        fetch('/admin/dashboard/weekly-chart', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.ok ? response.json() : Promise.reject('API Error'))
+            .then(data => {
+                this.renderActiveUsersChart(data);
+                this.renderOrderedProductsChart(data);
+                this.renderNewOrdersChart(data);
+                this.renderNewFeedbacksChart(data);
+            })
+            .catch(error => {
+                console.error('Failed to load chart data:', error);
+                this.showChartError();
+            });
+    }
+
+    // chart rendering functions
+    renderActiveUsersChart(data) {
+        const ctx = document.getElementById('activeUsersChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.days,
+                datasets: [{
+                    label: 'Active Users',
+                    data: data.activeUsers,
+                    borderColor: '#B88E2F',
+                    backgroundColor: 'rgba(184, 142, 47, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#B88E2F',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: this.getChartOptions()
+        });
+    }
+
+    renderOrderedProductsChart(data) {
+        const ctx = document.getElementById('orderedProductsChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.days,
+                datasets: [{
+                    label: 'Products Ordered',
+                    data: data.orderedProducts,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#28a745',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: this.getChartOptions()
+        });
+    }
+
+    renderNewOrdersChart(data) {
+        const ctx = document.getElementById('newOrdersChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.days,
+                datasets: [{
+                    label: 'New Orders',
+                    data: data.newOrders,
+                    borderColor: '#17a2b8',
+                    backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#17a2b8',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: this.getChartOptions()
+        });
+    }
+
+    renderNewFeedbacksChart(data) {
+        const ctx = document.getElementById('newFeedbacksChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.days,
+                datasets: [{
+                    label: 'New Feedbacks',
+                    data: data.newFeedbacks,
+                    borderColor: '#fd7e14',
+                    backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fd7e14',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: this.getChartOptions()
+        });
+    }
+
+    getChartOptions() {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#666',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    },
+                    ticks: {
+                        color: '#666',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 8
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        };
+    }
+
+    showChartError() {
+        const chartContainers = ['activeUsersChart', 'orderedProductsChart', 'newOrdersChart', 'newFeedbacksChart'];
+        chartContainers.forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.innerHTML = '<div style="color: #666; text-align: center;"><i class="fas fa-chart-line" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>Unable to load chart data</div>';
+            }
+        });
+    }
+
     bindEvents() {
         // Modal trigger buttons
         document.addEventListener('click', (e) => {
@@ -59,21 +245,17 @@ class AdminPanel {
     }
 
     handleFormSubmit(e) {
-        console.log('Form being submitted:', e.target);
+        // Form submission handler
     }
 
     openModal(modalId) {
-        console.log('Opening modal:', modalId); // Debug log
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add('active');
-        } else {
-            console.error('Modal not found:', modalId);
         }
     }
 
     closeModal(modalId) {
-        console.log('Closing modal:', modalId); // Debug log
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
@@ -125,7 +307,7 @@ class AdminPanel {
                 }
             })
             .catch(error => {
-                console.log('Stats update failed:', error);
+                // Silently handle stats update failure
                 const statNumbers = document.querySelectorAll('.stat-number');
                 statNumbers.forEach(stat => {
                     const currentValue = parseInt(stat.textContent.replace(/,/g, ''));
@@ -139,15 +321,13 @@ class AdminPanel {
     }
 
     logout() {
-        //console.log('Logout method called');
+        // Logout method implementation
     }
 
 }
 
 // Language selector function
 function selectLanguage(lang) {
-    console.log('Language selected:', lang);
-
     window.location.href = `/language/${lang}`;
 }
 
@@ -160,7 +340,17 @@ function toggleDropdown() {
 }
 
 function logout() {
-    //console.log('Global logout function called');
+    // Global logout function implementation
+}
+
+const LOAD_WEEKLY_CHARTS_RETRY_TIMEOUT_MS = 50;
+// Global function to load weekly charts (called from dashboard)
+function loadWeeklyCharts() {
+    if (window.adminPanel && typeof window.adminPanel.loadWeeklyCharts === 'function') {
+        window.adminPanel.loadWeeklyCharts();
+    } else {
+        setTimeout(loadWeeklyCharts, LOAD_WEEKLY_CHARTS_RETRY_TIMEOUT_MS);
+    }
 }
 
 // Initialize admin panel
@@ -176,4 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize admin panel
     window.adminPanel = new AdminPanel();
+    
+    // Make loadWeeklyCharts available globally immediately
+    window.loadWeeklyCharts = loadWeeklyCharts;
 });

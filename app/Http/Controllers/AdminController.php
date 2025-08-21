@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Feedback;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
@@ -52,6 +53,56 @@ class AdminController extends Controller
         ];
         
         return response()->json($stats);
+    }
+
+    public function getWeeklyChartData()
+    {
+        $days = [];
+        $activeUsers = [];
+        $orderedProducts = [];
+        $newOrders = [];
+        $newFeedbacks = [];
+
+        // get data for the last 7 days
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $days[] = $date->format('M d');
+            $dateString = $date->format('Y-m-d');
+            
+            // the number of active users (who placed orders or left feedback ...)
+            $usersWithOrders = User::whereHas('orders', function($query) use ($dateString) {
+                $query->whereDate('order_date', $dateString);
+            })->pluck('id');
+            
+            $usersWithFeedbacks = User::whereHas('feedbacks', function($query) use ($dateString) {
+                $query->whereDate('created_at', $dateString);
+            })->pluck('id');
+            
+            $activeUserCount = $usersWithOrders->merge($usersWithFeedbacks)->unique()->count();
+            $activeUsers[] = $activeUserCount;
+            
+            // the number of products ordered in the day
+            $orderedProductCount = OrderItem::whereHas('order', function($query) use ($dateString) {
+                $query->whereDate('order_date', $dateString);
+            })->sum('quantity');
+            $orderedProducts[] = (int) $orderedProductCount;
+            
+            // the number of new orders in the day
+            $newOrderCount = Order::whereDate('order_date', $dateString)->count();
+            $newOrders[] = $newOrderCount;
+            
+            // the number of new feedbacks in the day
+            $newFeedbackCount = Feedback::whereDate('created_at', $dateString)->count();
+            $newFeedbacks[] = $newFeedbackCount;
+        }
+
+        return response()->json([
+            'days' => $days,
+            'activeUsers' => $activeUsers,
+            'orderedProducts' => $orderedProducts,
+            'newOrders' => $newOrders,
+            'newFeedbacks' => $newFeedbacks
+        ]);
     }
 
     public function users()

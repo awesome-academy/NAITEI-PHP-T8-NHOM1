@@ -66,6 +66,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.alt');
     Route::get('/dashboard/stats', [AdminController::class, 'dashboardStats'])->name('dashboard.stats');
+    Route::get('/dashboard/weekly-chart', [AdminController::class, 'getWeeklyChartData'])->name('dashboard.weekly-chart');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
