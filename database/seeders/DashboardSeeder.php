@@ -12,7 +12,7 @@ use App\Models\Feedback;
 use App\Models\Role;
 use Carbon\Carbon;
 
-class DashboardDemoSeeder extends Seeder
+class DashboardSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -27,7 +27,7 @@ class DashboardDemoSeeder extends Seeder
             ], [
                 'name' => "Demo User {$i}",
                 'password' => bcrypt('password'),
-                'role_id' => Role::where('name', 'customer')->first()->id,
+                'role_id' => Role::CUSTOMER,
             ]);
         }
 
@@ -36,7 +36,7 @@ class DashboardDemoSeeder extends Seeder
         $categoryNames = ['Bedroom', 'Living Room', 'Dining', 'Kitchen', 'Office'];
         foreach ($categoryNames as $name) {
             $categories[] = Category::firstOrCreate(['name' => $name], [
-                'image' => 'images/default-category.svg'
+                'image' => 'images/default-category.jpg'
             ]);
         }
 
@@ -54,7 +54,7 @@ class DashboardDemoSeeder extends Seeder
                 'description' => "Demo {$name} for dashboard analytics",
                 'stock' => rand(10, 100),
                 'category_id' => $categories[$index % count($categories)]->category_id,
-                'image' => 'images/default-product.svg'
+                'image' => 'images/default-product.jpg'
             ]);
         }
 
@@ -102,7 +102,8 @@ class DashboardDemoSeeder extends Seeder
             // feedbacks
             $feedbackCounts = [4, 8, 6, 15, 11, 18, 12]; // number of feedbacks for each day
             $feedbacksToday = $feedbackCounts[6 - $i];
-            
+            $randomDate = $date->copy()->addMinutes(rand(0, 1440));
+
             for ($j = 0; $j < $feedbacksToday; $j++) {
                 $user = $users[array_rand($users)];
                 $product = $products[array_rand($products)];
@@ -112,8 +113,8 @@ class DashboardDemoSeeder extends Seeder
                     'product_id' => $product->product_id,
                     'rating' => rand(3, 5),
                     'comment' => "Demo feedback for analytics dashboard",
-                    'created_at' => $date->addMinutes(rand(0, 1440)), // random time within the day
-                    'updated_at' => $date,
+                    'created_at' => $randomDate,
+                    'updated_at' => $randomDate,
                 ]);
             }
         }

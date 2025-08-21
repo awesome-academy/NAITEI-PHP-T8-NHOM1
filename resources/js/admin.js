@@ -252,6 +252,12 @@ class AdminPanel {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add('active');
+            // Re-initialize image enlargement for dynamic content
+            setTimeout(() => {
+                if (typeof imageEnlargement !== 'undefined') {
+                    imageEnlargement.reinitialize();
+                }
+            }, 100);
         }
     }
 
@@ -353,6 +359,98 @@ function loadWeeklyCharts() {
     }
 }
 
+class ImageEnlargement {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initImageEnlargement();
+                this.bindModalEvents();
+            });
+        } else {
+            this.initImageEnlargement();
+            this.bindModalEvents();
+        }
+    }
+
+    bindModalEvents() {
+        // wait for modal to be available
+        const TIMEOUT_MS = 100;
+        const waitForModal = () => {
+            const modal = document.getElementById('imageEnlargeModal');
+            if (modal) {
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        this.closeModal();
+                    }
+                });
+            } else {
+                setTimeout(waitForModal, TIMEOUT_MS);
+            }
+        };
+        
+        waitForModal();
+
+        // escape key to close modal
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.closeModal();
+            }
+        });
+    }
+
+    initImageEnlargement() {
+        const clickableImages = document.querySelectorAll('.clickable-image');
+        
+        clickableImages.forEach(img => {
+            img.removeEventListener('click', this.boundEnlargeImage);
+            
+            if (!this.boundEnlargeImage) {
+                this.boundEnlargeImage = this.enlargeImage.bind(this);
+            }
+            img.addEventListener('click', this.boundEnlargeImage);
+        });
+    }
+
+    enlargeImage(event) {
+        const img = event.target;
+        const enlargedImg = document.getElementById('enlargedImage');
+        const modal = document.getElementById('imageEnlargeModal');
+        
+        if (!enlargedImg || !modal) {
+            console.error('Image enlarge modal elements not found');
+            return;
+        }
+        
+        // set the source of the enlarged image
+        enlargedImg.src = img.src;
+        enlargedImg.alt = img.alt || 'Enlarged Image';
+        
+        // show the modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeModal() {
+        const modal = document.getElementById('imageEnlargeModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; // restore scrolling
+        }
+    }
+
+    reinitialize() {
+        this.initImageEnlargement();
+    }
+}
+
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', () => {
     // Bind language selector events
@@ -366,6 +464,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize admin panel
     window.adminPanel = new AdminPanel();
+    
+    // Initialize image enlargement
+    window.imageEnlargement = new ImageEnlargement();
     
     // Make loadWeeklyCharts available globally immediately
     window.loadWeeklyCharts = loadWeeklyCharts;

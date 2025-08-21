@@ -57,6 +57,11 @@
                     @endforelse
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div style="margin-top: 20px; display: flex; justify-content: center;">
+                {{ $categories->links('pagination.pagination') }}
+            </div>
         </div>
     </div>
 </div>
@@ -75,15 +80,53 @@
             document.getElementById('edit_category_name').value = name;
             document.getElementById('editCategoryForm').action = `/admin/categories/${id}`;
             
-            // Check null trước khi set src
-            // const previewImg = document.getElementById('edit_category_preview');
-            // if (image && image !== 'null' && image !== '') {
-            //     previewImg.src = `/${image}`;
-            //     previewImg.style.display = 'block';
-            // } else {
-            //     previewImg.src = '';
-            //     previewImg.style.display = 'none';
-            // }
+            // display current image
+            const editImageEl = document.getElementById('edit_category_image_preview');
+            const editNoImageEl = document.getElementById('edit_category_no_image');
+            const fileInput = document.querySelector('#editCategoryModal input[name="image"]');
+            
+            // original image source (restore if no new image is selected)
+            let originalImageSrc = '';
+            
+            if (image && image !== '' && image !== 'null') {
+                originalImageSrc = '/' + image;
+                editImageEl.src = originalImageSrc;
+                editImageEl.style.display = 'block';
+                editNoImageEl.style.display = 'none';
+            } else {
+                editImageEl.style.display = 'none';
+                editNoImageEl.style.display = 'block';
+            }
+
+            // reset file input when opening modal
+            fileInput.value = '';
+            
+            fileInput.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            editImageEl.src = e.target.result;
+                            editImageEl.style.display = 'block';
+                            editNoImageEl.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        event.target.value = '';
+                    }
+                } else {
+                    if (originalImageSrc) {
+                        editImageEl.src = originalImageSrc;
+                        editImageEl.style.display = 'block';
+                        editNoImageEl.style.display = 'none';
+                    } else {
+                        editImageEl.style.display = 'none';
+                        editNoImageEl.style.display = 'block';
+                    }
+                }
+            };
+            
             adminPanel.openModal('editCategoryModal');
         });
     });

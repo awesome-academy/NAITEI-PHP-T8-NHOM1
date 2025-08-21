@@ -111,7 +111,7 @@
                 <input type="file"  id="categoryImage" name="image" class="form-control" accept="image/*">
                 <div id="currentImage" style="margin-top: 10px; display: none;">
                     <label class="form-label">Current Image:</label><br>
-                    <img id="currentImageSrc" src="" alt="Current category image" style="max-width: 100px; max-height: 100px;">
+                    <img id="currentImageSrc" src="" alt="Current category image" class="clickable-image" style="max-width: 100px; max-height: 100px;">
                 </div>
             </div>
             <div style="text-align: right; margin-top: 25px;">
@@ -141,7 +141,10 @@
             <div class="form-group">
                 <label class="form-label">Image</label>
                 <input type="file" id="edit_category_image" class="form-control" name="image">
-                <!-- <img id="edit_category_preview" src="" alt="Pr                                                                                                                                                             eview" style="max-width: 100px; margin-top: 10px;"> -->
+                <div id="edit_category_image_container" style="margin-top: 10px; text-align: center;">
+                    <img id="edit_category_image_preview" src="" alt="Category Image" class="clickable-image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
+                    <p id="edit_category_no_image" style="color: #666; display: none;">{{ __('No image available') }}</p>
+                </div>
             </div>
             <div style="text-align: right; margin-top: 25px;">
                 <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('editCategoryModal')">Cancel</button>
@@ -261,8 +264,8 @@
             <div class="form-group">
                 <label class="form-label">{{ __('Image') }}</label>
                 <input type="file" name="image" class="form-control" accept="image/*">
-                <div id="edit_product_image_container" style="margin-top: 10px;">
-                    <img id="edit_product_image" src="" alt="Product Image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
+                <div id="edit_product_image_container" style="margin-top: 10px; text-align: center;">
+                    <img id="edit_product_image" src="" alt="Product Image" class="clickable-image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
                     <p id="edit_no_image" style="color: #666; display: none;">{{ __('No image available') }}</p>
                 </div>
             </div>
@@ -336,7 +339,7 @@
             <div class="form-group">
                 <label class="form-label">{{ __('Product Image') }}</label>
                 <div id="view_product_image_container" style="margin-top: 10px;">
-                    <img id="view_product_image" src="" alt="Product Image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
+                    <img id="view_product_image" src="" alt="Product Image" class="clickable-image" style="max-width: 200px; max-height: 200px; border-radius: 8px; display: none;">
                     <p id="view_no_image" style="color: #666; display: none;">{{ __('No image available') }}</p>
                 </div>
             </div>
@@ -452,6 +455,15 @@
         <div class="modal-footer" style="text-align: right; margin-top: 25px;">
             <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('deleteFeedbackModal')">{{ __('Cancel') }}</button>
             <button type="button" class="btn btn-danger" id="confirmDeleteFeedback">{{ __('Delete') }}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal" id="imageEnlargeModal">
+    <div class="modal-content">
+        <div>
+            <img id="enlargedImage" src="" alt="Enlarged Image">
         </div>
     </div>
 </div>
