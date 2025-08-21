@@ -107,7 +107,7 @@ class AdminController extends Controller
 
     public function users()
     {
-        $users = User::paginate(10);
+        $users = User::orderBy('updated_at', 'desc')->paginate(10);
         $roles = Role::all(); // Lấy tất cả roles để tạo filter dropdown
         return view('admin.pages.users', compact('users', 'roles'));
     }
@@ -183,7 +183,7 @@ class AdminController extends Controller
     public function categories()
     {
         // count products in each category
-        $categories = Category::withCount('products')->get();
+        $categories = Category::withCount('products')->orderBy('updated_at', 'desc')->paginate(10);
         return view('admin.pages.categories', compact('categories'));
     }
 
@@ -261,7 +261,7 @@ class AdminController extends Controller
 
     public function products()
     {
-        $products = Product::with('category')->paginate(10); // paginate products (10 per page)
+        $products = Product::with('category')->orderBy('updated_at', 'desc')->paginate(10); // paginate products (10 per page)
         $categories = Category::all();
         return view('admin.pages.products', compact('products', 'categories'));
     }
@@ -352,7 +352,7 @@ class AdminController extends Controller
 
     public function orders(Request $request)
     {
-        $query = Order::with('user')->orderBy('created_at', 'desc');
+        $query = Order::with('user')->orderBy('updated_at', 'desc');
 
         // Filter by status
         if ($request->filled('status')) {
@@ -376,7 +376,7 @@ class AdminController extends Controller
 
     public function feedbacks()
     {
-        $feedbacks = Feedback::with('user', 'product')->orderBy('created_at', 'desc')->paginate(10);
+        $feedbacks = Feedback::with('user', 'product')->orderBy('updated_at', 'desc')->paginate(10);
         return view('admin.pages.feedbacks', compact('feedbacks'));
     }
 

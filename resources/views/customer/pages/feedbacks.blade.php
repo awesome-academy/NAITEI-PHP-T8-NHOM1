@@ -133,7 +133,7 @@
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <div class="menu-dropdown" id="menu-{{ $feedback->feedback_id }}">
-                                            <button class="menu-item" onclick="editFeedback({{ $feedback->feedback_id }}, '{{ json_encode($feedback->comment) }}', {{ $feedback->rating }})">
+                                            <button class="menu-item" onclick="editFeedback({{ $feedback->feedback_id }}, {{ json_encode($feedback->comment) }}, {{ $feedback->rating }})">
                                                 <i class="fas fa-edit"></i>
                                                 {{ __('Edit') }}
                                             </button>
