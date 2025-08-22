@@ -541,6 +541,7 @@ body {
 .status-pending { background: #fff3cd; color: #856404; }
 .status-approved { background: #d1ecf1; color: #0c5460; }
 .status-reject { background: #f8d7da; color: #721c24; }
+.status-delivering { background: #fff3cd; color: #856404; }
 .status-delivered { background: #d4edda; color: #155724; }
 .status-cancelled { background: #e2e3e5; color: #383d41; }
 

@@ -6,13 +6,6 @@
 <section class="hero-section">
     <div class="hero-content">
         <h1>{{ $category->name }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
-            <i class="fas fa-chevron-right"></i>
-            <a href="{{ route('customer.categories') }}">{{ __('Shop') }}</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>{{ $category->name }}</span>
-        </div>
     </div>
 </section>
 @endsection
@@ -525,6 +518,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Submit the form programmatically.
             // This will trigger a POST request to the specified URL.
             form.submit();
+            
+            // Trigger cart shake animation
+            if (typeof window.shakeCart === 'function') {
+                // Small delay to ensure form submission starts first
+                setTimeout(() => {
+                    window.shakeCart();
+                }, 100);
+            }
         });
     });
 
