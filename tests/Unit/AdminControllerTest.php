@@ -230,6 +230,57 @@ class AdminControllerTest extends TestCase
     }
 
     /** @test */
+    public function it_can_delete_only_deactivated_users()
+    {
+        $this->withoutMiddleware();
+        
+        $customerRole = Role::where('name', 'customer')->first();
+        $activeUser = User::factory()->create([
+            'role_id' => $customerRole->role_id,
+            'is_activate' => true
+        ]);
+        $deactivatedUser = User::factory()->create([
+            'role_id' => $customerRole->role_id,
+            'is_activate' => false
+        ]);
+
+        // try to delete active user -> fail
+        $response = $this->actingAs($this->adminUser)
+                         ->delete("/admin/users/{$activeUser->id}");
+
+        $response->assertStatus(403);
+        $response->assertJson(['success' => false]);
+
+        // try to delete deactivated user -> succeed
+        $response = $this->actingAs($this->adminUser)
+                         ->delete("/admin/users/{$deactivatedUser->id}");
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+    }
+
+    /** @test */
+    public function it_can_toggle_user_activation()
+    {
+        $this->withoutMiddleware();
+        
+        $customerRole = Role::where('name', 'customer')->first();
+        $user = User::factory()->create([
+            'role_id' => $customerRole->role_id,
+            'is_activate' => true
+        ]);
+
+        $response = $this->actingAs($this->adminUser)
+                         ->post("/admin/users/{$user->id}/toggle-activation");
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+        
+        $user->refresh();
+        $this->assertFalse($user->is_activate);
+    }
+
+    /** @test */
     public function it_can_delete_product()
     {
         $this->withoutMiddleware();

@@ -23,17 +23,13 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required','string','email','max:255',
-                Rule::unique('users', 'email')->ignore($this->user) // bỏ qua user hiện tại
-            ],
             'role_id' => [
                 'required',
                 'integer',
                 Rule::in([1, 2]),               // giới hạn admin & customer
                 Rule::exists('roles', 'role_id')     // đảm bảo tồn tại trong bảng roles
             ],
+            'is_activate' => ['required', 'boolean'],
         ];
     }
 }

@@ -54,11 +54,11 @@
             <input type="hidden" name="user_id" id="edit_user_id">
             <div class="form-group">
                 <label class="form-label" for="edit_user_name">{{ __('Username') }}</label>
-                <input type="text" class="form-control" name="name" id="edit_user_name" required>
+                <input type="text" class="form-control" id="edit_user_name" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
             </div>
             <div class="form-group">
                 <label class="form-label" for="edit_user_email">{{ __('Email') }}</label>
-                <input type="email" class="form-control" name="email" id="edit_user_email" required>
+                <input type="email" class="form-control" id="edit_user_email" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
             </div>
             <div class="form-group">
                 <label class="form-label" for="edit_user_role">{{ __('Role') }}</label>
@@ -68,6 +68,7 @@
                     <option value="1">{{ __('Admin') }}</option>
                 </select>
             </div>
+            <input type="hidden" name="is_activate" id="edit_user_is_activate" value="1">
             <div style="text-align: right; margin-top: 25px;">
                 <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('editUserModal')">{{ __('Cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ __('Update User') }} </button>
