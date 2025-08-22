@@ -105,6 +105,6 @@ class CheckoutController extends Controller
             $request->session()->forget('cart');
         });
 
-        return redirect()->route('customer.categories')->with('success', __('Order placed successfully.'));
+        return redirect()->route('customer.orders')->with('success', __('Order placed successfully.'));
     }
 } 

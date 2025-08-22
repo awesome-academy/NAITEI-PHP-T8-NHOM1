@@ -6,11 +6,6 @@
 <section class="hero-section">
     <div class="hero-content">
         <h1>{{ __('Contact') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>{{ __('Contact') }}</span>
-        </div>
     </div>
 </section>
 @endsection

@@ -6,24 +6,77 @@
 <section class="hero-section">
     <div class="hero-content">
         <h1>{{ __('Orders') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>{{ __('Orders') }}</span>
-        </div>
     </div>
 </section>
 @endsection
 
 @section('content')
 <div class="orders-container">
-    <!-- Orders Header -->
-    <div class="orders-header">
-        <h2>{{ __('Order History') }}</h2>
-        <p class="orders-subtitle">{{ __('Track your orders and view details') }}</p>
+    <!-- Tab Navigation -->
+    <div class="order-tabs">
+        <a href="{{ route('customer.orders', array_merge(request()->query(), ['tab' => 'active'])) }}" 
+           class="tab-link {{ $tab === 'active' ? 'active' : '' }}">
+            <i class="fas fa-clock"></i>
+            {{ __('Active Orders') }}
+        </a>
+        <a href="{{ route('customer.orders', array_merge(request()->query(), ['tab' => 'history'])) }}" 
+           class="tab-link {{ $tab === 'history' ? 'active' : '' }}">
+            <i class="fas fa-history"></i>
+            {{ __('Order History') }}
+        </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" action="{{ route('customer.orders') }}" class="filter-form">
+            <input type="hidden" name="tab" value="{{ $tab }}">
+            
+            <div class="filter-group">
+                <label for="status">{{ __('Status') }}:</label>
+                <select id="status" name="status" class="status-select">
+                    <option value="">{{ __('All Statuses') }}</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
+                            {{ __($status) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="date_from">{{ __('From Date') }}:</label>
+                <input type="date" id="date_from" name="date_from" 
+                       value="{{ request('date_from') }}" class="date-input">
+            </div>
+            
+            <div class="filter-group">
+                <label for="date_to">{{ __('To Date') }}:</label>
+                <input type="date" id="date_to" name="date_to" 
+                       value="{{ request('date_to') }}" class="date-input">
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-filter"></i>
+                    {{ __('Filter') }}
+                </button>
+                
+                @if(request('date_from') || request('date_to') || request('status'))
+                <a href="{{ route('customer.orders', ['tab' => $tab]) }}" class="btn-clear">
+                    <i class="fas fa-times"></i>
+                    {{ __('Clear') }}
+                </a>
+                @endif
+            </div>
+        </form>
     </div>
 
     @if($orders->count() > 0)
+        <!-- Orders Count -->
+        <div class="orders-count">
+            <p>{{ __('Showing') }} {{ $orders->count() }} {{ __('of') }} {{ $orders->total() }} {{ __('orders') }}</p>
+        </div>
+
         <!-- Orders List -->
         <div class="orders-list">
             @foreach($orders as $order)
@@ -35,11 +88,11 @@
                     </div>
                     <div class="order-status">
                         @php
-                            $latestStatus = $order->statusOrders->last();
                             $statusClass = match($order->status ?? 'pending') {
                                 'pending' => 'status-pending',
                                 'approved' => 'status-approved',
                                 'rejected' => 'status-rejected',
+                                'delivering' => 'status-delivering',
                                 'delivered' => 'status-delivered',
                                 'cancelled' => 'status-cancelled',
                                 default => 'status-pending'
@@ -51,67 +104,70 @@
                     </div>
                 </div>
 
-                <div class="order-summary">
+                <div class="order-body">
                     <div class="order-items">
-                        <h4>{{ __('Items') }} ({{ $order->orderItems->count() }})</h4>
-                        <div class="items-preview">
-                            @foreach($order->orderItems->take(3) as $item)
-                            <div class="item-preview">
-                                <img src="{{ asset($item->product->image ?? 'images/default-product.svg') }}" alt="{{ $item->product->name }}">
-                                <div class="item-info">
-                                    <span class="item-name">{{ $item->product->name }}</span>
-                                    <span class="item-quantity">x{{ $item->quantity }}</span>
-                                </div>
+                        @foreach($order->orderItems->take(3) as $item)
+                        <div class="order-item">
+                            <img src="{{ asset($item->product->image ?? 'images/default-product.svg') }}" 
+                                 alt="{{ $item->product->name }}" class="item-image">
+                            <div class="item-details">
+                                <p class="item-name">{{ $item->product->name }}</p>
+                                <p class="item-quantity">{{ __('Quantity') }}: {{ $item->quantity }}</p>
                             </div>
-                            @endforeach
-                            @if($order->orderItems->count() > 3)
-                                <div class="more-items">
-                                    +{{ $order->orderItems->count() - 3 }} {{ __('more items') }}
-                                </div>
-                            @endif
+                            <div class="item-price">
+                                <span class="price">{{ number_format($item->price, 0, ',', '.') }} {{ __('VND') }}</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="order-total">
-                        <p class="total-label">{{ __('Total') }}</p>
-                        <p class="total-amount">{{ number_format($order->total_cost, 0, '.', ',') }} {{ __('VND') }}</p>
+                        @endforeach
+                        
+                        @if($order->orderItems->count() > 3)
+                        <div class="more-items">
+                            <span>{{ __('and') }} {{ $order->orderItems->count() - 3 }} {{ __('more items') }}</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
-                <div class="order-actions">
-                    <a href="{{ route('customer.orders.details', $order->order_id) }}" class="btn-view-details">
-                        <i class="fas fa-eye"></i>
-                        {{ __('View Details') }}
-                    </a>
-                    @if($order->status === 'delivered')
-                        <button class="btn-reorder">
-                            <i class="fas fa-redo"></i>
-                            {{ __('Reorder') }}
-                        </button>
-                    @endif
+                <div class="order-footer">
+                    <div class="order-total">
+                        <span class="total-label">{{ __('Total') }}:</span>
+                        <span class="total-amount">{{ number_format($order->total_cost, 0, ',', '.') }} {{ __('VND') }}</span>
+                    </div>
+                    <div class="order-actions">
+                        <a href="{{ route('customer.orders.details', $order->order_id) }}" class="btn btn-primary">
+                            <i class="fas fa-eye"></i>
+                            {{ __('View Details') }}
+                        </a>
+                    </div>
                 </div>
             </div>
             @endforeach
         </div>
 
         <!-- Pagination -->
-        @if($orders->hasPages())
         <div class="pagination-wrapper">
             {{ $orders->links() }}
         </div>
-        @endif
-
     @else
         <!-- Empty State -->
         <div class="empty-orders">
             <div class="empty-icon">
                 <i class="fas fa-shopping-bag"></i>
             </div>
-            <h3>{{ __('No Orders Yet') }}</h3>
-            <p>{{ __('You haven\'t placed any orders yet. Start shopping to see your order history here.') }}</p>
-            <a href="{{ route('customer.categories') }}" class="btn-start-shopping">
+            <h3>{{ $tab === 'active' ? __('No Active Orders') : __('No Order History') }}</h3>
+            <p>
+                @if($tab === 'active')
+                    {{ __('You don\'t have any active orders. Start shopping to place your first order!') }}
+                @else
+                    {{ __('You don\'t have any completed orders yet.') }}
+                @endif
+            </p>
+            @if($tab === 'active')
+            <a href="{{ route('customer.categories') }}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i>
                 {{ __('Start Shopping') }}
             </a>
+            @endif
         </div>
     @endif
 </div>
@@ -122,83 +178,210 @@
 .orders-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 2rem;
 }
 
 .orders-header {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 2rem;
 }
 
 .orders-header h2 {
-    font-size: 36px;
-    font-weight: 600;
+    font-size: 2.5rem;
+    font-weight: 700;
     color: #333;
-    margin-bottom: 15px;
+    margin-bottom: 0.5rem;
 }
 
 .orders-subtitle {
-    font-size: 18px;
     color: #666;
-    max-width: 600px;
-    margin: 0 auto;
+    font-size: 1.1rem;
 }
 
-/* Orders List */
+/* Tab Navigation */
+.order-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #f0f0f0;
+    justify-content: center;
+}
+
+.tab-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-link:hover {
+    color: #B88E2F;
+    background-color: rgba(184, 142, 47, 0.05);
+}
+
+.tab-link.active {
+    color: #B88E2F;
+    border-bottom-color: #B88E2F;
+    background-color: rgba(184, 142, 47, 0.05);
+}
+
+/* Date Filter */
+.filter-section {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.date-input, .status-select {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    width: 100%;
+    background: white;
+    transition: all 0.3s ease;
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.status-select {
+    cursor: pointer;
+}
+
+.date-input:focus, .status-select:focus {
+    outline: none;
+    border-color: #B88E2F;
+    box-shadow: 0 0 0 3px rgba(184, 142, 47, 0.1);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+
+.btn-filter, .btn-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: auto;
+    min-height: 48px;
+}
+
+.btn-filter {
+    background: #B88E2F;
+    color: white;
+}
+
+.btn-filter:hover {
+    background: #a67c29;
+}
+
+.btn-clear {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-clear:hover {
+    background: #5a6268;
+}
+
+/* Orders Count */
+.orders-count {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Order Cards */
 .orders-list {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 1.5rem;
 }
 
 .order-card {
     background: white;
+    border: 1px solid #e0e0e0;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    padding: 25px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .order-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Order Header */
 .order-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid #f0f0f0;
 }
 
 .order-number {
-    font-size: 20px;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 5px;
+    margin: 0 0 0.25rem 0;
 }
 
 .order-date {
     color: #666;
-    font-size: 14px;
+    font-size: 0.9rem;
+    margin: 0;
 }
 
-/* Status Badges */
 .order-status-badge {
-    padding: 6px 16px;
+    padding: 0.5rem 1rem;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .status-pending {
-    background: #FFF3E0;
-    color: #F57C00;
+    background: #fff3cd;
+    color: #856404;
 }
 
 .status-approved {
@@ -211,199 +394,280 @@
     color: #721c24;
 }
 
-.status-delivered {
-    background: #E8F5E8;
+.status-delivering {
+    background: #d4edda;
     color: #155724;
 }
 
+.status-delivered {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
 .status-cancelled {
-    background: #e2e3e5;
-    color: #383d41;
+    background: #f8d7da;
+    color: #721c24;
 }
 
-/* Order Summary */
-.order-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
+/* Order Items */
+.order-items {
+    margin-bottom: 1rem;
 }
 
-.order-items h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 15px;
-}
-
-.items-preview {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.item-preview {
+.order-item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f8f8;
 }
 
-.item-preview img {
-    width: 50px;
-    height: 50px;
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-image {
+    width: 60px;
+    height: 60px;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
 }
 
-.item-info {
+.item-details {
     flex: 1;
 }
 
 .item-name {
-    display: block;
-    font-size: 14px;
-    color: #333;
     font-weight: 500;
+    color: #333;
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
 }
 
 .item-quantity {
-    font-size: 12px;
     color: #666;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.item-price .price {
+    font-weight: 600;
+    color: #B88E2F;
+    font-size: 0.95rem;
 }
 
 .more-items {
-    font-size: 12px;
-    color: #B88E2F;
+    text-align: center;
+    padding: 0.5rem 0;
+    color: #666;
     font-style: italic;
-    margin-top: 5px;
+    font-size: 0.9rem;
 }
 
-/* Order Total */
+/* Order Footer */
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
 .order-total {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .total-label {
-    font-size: 14px;
+    font-size: 1rem;
     color: #666;
-    margin-bottom: 5px;
 }
 
 .total-amount {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: #B88E2F;
 }
 
-/* Order Actions */
 .order-actions {
     display: flex;
-    gap: 15px;
-    justify-content: flex-end;
+    gap: 0.75rem;
 }
 
-.btn-view-details,
-.btn-reorder {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.btn {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.btn-view-details {
+.btn-primary {
     background: #B88E2F;
     color: white;
 }
 
-.btn-view-details:hover {
-    background: #A67F2A;
-}
-
-.btn-reorder {
-    background: #f8f9fa;
-    color: #333;
-    border: 1px solid #ddd;
-}
-
-.btn-reorder:hover {
-    background: #e9ecef;
+.btn-primary:hover {
+    background: #a67c29;
+    transform: translateY(-1px);
 }
 
 /* Empty State */
 .empty-orders {
     text-align: center;
-    padding: 80px 20px;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
 }
 
 .empty-icon {
-    font-size: 80px;
-    color: #ddd;
-    margin-bottom: 30px;
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 1.5rem;
 }
 
 .empty-orders h3 {
-    font-size: 28px;
+    font-size: 1.5rem;
     color: #333;
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
 }
 
 .empty-orders p {
-    font-size: 16px;
     color: #666;
-    margin-bottom: 30px;
-    max-width: 500px;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    max-width: 400px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.btn-start-shopping {
-    background: #B88E2F;
-    color: white;
-    padding: 15px 30px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 16px;
-    transition: background 0.3s ease;
+/* Pagination */
+.pagination-wrapper {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
 }
 
-.btn-start-shopping:hover {
-    background: #A67F2A;
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .filter-form {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .filter-actions {
+        grid-column: span 2;
+        justify-content: center;
+        flex-direction: row;
+    }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
+    .orders-container {
+        padding: 1rem;
+    }
+    
+    .order-tabs {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .tab-link {
+        border-bottom: 1px solid #f0f0f0;
+        border-radius: 0;
+    }
+    
+    .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .filter-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+    
     .order-header {
         flex-direction: column;
-        gap: 15px;
+        gap: 1rem;
         align-items: flex-start;
     }
     
-    .order-summary {
+    .order-footer {
         flex-direction: column;
-        gap: 20px;
-    }
-    
-    .order-total {
-        text-align: left;
+        gap: 1rem;
+        align-items: stretch;
     }
     
     .order-actions {
-        justify-content: flex-start;
-        flex-wrap: wrap;
+        justify-content: center;
     }
     
-    .items-preview {
-        max-height: 150px;
-        overflow-y: auto;
+    .order-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .item-details {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .orders-header h2 {
+        font-size: 2rem;
+    }
+    
+    .order-card {
+        padding: 1rem;
+    }
+    
+    .item-image {
+        width: 50px;
+        height: 50px;
     }
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+// Set max date for date inputs to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateFromInput = document.getElementById('date_from');
+    const dateToInput = document.getElementById('date_to');
+    
+    if (dateFromInput) {
+        dateFromInput.setAttribute('max', today);
+    }
+    
+    if (dateToInput) {
+        dateToInput.setAttribute('max', today);
+    }
+    
+    // Validate date range
+    if (dateFromInput && dateToInput) {
+        dateFromInput.addEventListener('change', function() {
+            dateToInput.setAttribute('min', this.value);
+        });
+        
+        dateToInput.addEventListener('change', function() {
+            dateFromInput.setAttribute('max', this.value);
+        });
+    }
+});
+</script>
 @endpush

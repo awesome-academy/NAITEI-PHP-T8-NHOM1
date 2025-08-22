@@ -5,12 +5,7 @@
 @section('hero')
 <section class="hero-section">
     <div class="hero-content">
-        <h1>{{ __('Shop') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>{{ __('Shop') }}</span>
-        </div>
+        <h1>{{ __('Categories') }}</h1>
     </div>
 </section>
 @endsection

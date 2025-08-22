@@ -13,14 +13,14 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Living Room'],
-            ['name' => 'Bedroom'],
-            ['name' => 'Dining Room'],
-            ['name' => 'Office'],
-            ['name' => 'Kitchen'],
-            ['name' => 'Bathroom'],
-            ['name' => 'Outdoor'],
-            ['name' => 'Storage'],
+            ['name' => 'Living Room', 'image' => 'storage/images/categories/living-room.jpg'],
+            ['name' => 'Bedroom', 'image' => 'storage/images/categories/bedroom.jpg'],
+            ['name' => 'Dining Room', 'image' => 'storage/images/categories/dining-room.jpg'],
+            ['name' => 'Office', 'image' => 'storage/images/categories/office.jpg'],
+            ['name' => 'Kitchen', 'image' => 'storage/images/categories/kitchen.jpg'],
+            ['name' => 'Bathroom', 'image' => 'storage/images/categories/bathroom.jpg'],
+            ['name' => 'Outdoor', 'image' => 'storage/images/categories/outdoor.jpg'],
+            ['name' => 'Storage', 'image' => 'storage/images/categories/storage.jpg'],
         ];
 
         foreach ($categories as $category) {

@@ -15,6 +15,7 @@
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
                         <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
                         <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
+                        <option value="delivering" {{ request('status') == 'delivering' ? 'selected' : '' }}>{{ __('Delivering') }}</option>
                         <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
                     </select>
@@ -81,6 +82,7 @@
                                     'pending' => 'status-pending',
                                     'approved' => 'status-approved',
                                     'rejected' => 'status-reject',
+                                    'delivering' => 'status-delivering',
                                     'delivered' => 'status-delivered',
                                     'cancelled' => 'status-cancelled'
                                 ];
@@ -88,6 +90,7 @@
                                     'pending' => __('Pending'),
                                     'approved' => __('Approved'),
                                     'rejected' => __('Rejected'),
+                                    'delivering' => __('Delivering'),
                                     'delivered' => __('Delivered'),
                                     'cancelled' => __('Cancelled')
                                 ];
@@ -104,8 +107,8 @@
                                     <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
                                     <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>{{ __('Approve') }}</option>
                                     <option value="rejected" {{ $status==='rejected' ? 'selected' : '' }}>{{ __('Reject') }}</option>
+                                    <option value="delivering" {{ $status==='delivering' ? 'selected' : '' }}>{{ __('Delivering') }}</option>
                                     <option value="delivered" {{ $status==='delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
-                                    <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>{{ __('Cancel') }}</option>
                                 </select>
                                 <button type="submit" class="btn btn-success btn-sm">
                                     <i class="fas fa-save"></i> {{ __('Update') }}
@@ -142,8 +145,8 @@
         approved: "{{ __('Approved') }}",
         pending: "{{ __('Pending') }}",
         rejected: "{{ __('Rejected') }}",
-        delivered: "{{ __('Delivered') }}",
-        cancelled: "{{ __('Cancelled') }}"
+        delivering: "{{ __('Delivering') }}",
+        delivered: "{{ __('Delivered') }}"
     };
 
     function ucfirst(str) {

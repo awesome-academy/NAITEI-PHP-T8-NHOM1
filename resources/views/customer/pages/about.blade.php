@@ -6,11 +6,6 @@
 <section class="hero-section">
     <div class="hero-content">
         <h1>{{ __('About') }}</h1>
-        <div class="breadcrumb">
-            <a href="{{ route('customer.categories') }}">{{ __('Home') }}</a>
-            <i class="fas fa-chevron-right"></i>
-            <span>{{ __('About') }}</span>
-        </div>
     </div>
 </section>
 @endsection

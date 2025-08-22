@@ -9,6 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        :root {
+            --header-height: 80px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -25,6 +29,17 @@
             background: #fff;
             padding: 20px 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        /* Add padding to body to compensate for fixed header */
+        body {
+            padding-top: var(--header-height);
         }
         
         .header-container {
@@ -71,7 +86,7 @@
         
         .header-icons {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
         }
         
@@ -85,21 +100,40 @@
         .header-icons a:hover {
             color: #B88E2F;
         }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #B88E2F;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
         
         /* Hero Section */
-        .hero-section {
-            background: url('/images/default-product.svg') center/cover;
+                .hero-section {
+            background: url('/images/hero-bg.svg') center/cover;
             background-size: cover;
-            color: white;
-            padding: 80px 0;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #ffffff !important;
+            padding: 120px 0;
             text-align: center;
-            min-height: 300px;
+            min-height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
         }
-        
+
         .hero-section::before {
             content: '';
             position: absolute;
@@ -107,19 +141,21 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(1px);
         }
         
         .hero-content {
             text-align: center;
             position: relative;
             z-index: 2;
+            color: #ffffff !important;
         }
         
         .hero-content h1 {
             font-size: 48px;
             font-weight: 600;
-            color: #333;
+            color: #ffffff !important;
             margin-bottom: 10px;
         }
         
@@ -128,18 +164,28 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            color: #666;
+            color: #ffffff !important;
             font-size: 16px;
         }
         
         .breadcrumb a {
-            color: #333;
+            color: #ffffff !important;
             text-decoration: none;
             font-weight: 500;
         }
         
+        .breadcrumb a:hover {
+            color: #ffffff !important;
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #ffffff !important;
+        }
+        
         .breadcrumb i {
             font-size: 12px;
+            color: #ffffff !important;
         }
         
         /* Main Content */

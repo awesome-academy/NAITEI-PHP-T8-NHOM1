@@ -6,7 +6,7 @@
         </a>
         
         <nav class="nav-menu">
-            <a href="{{ route('customer.categories') }}" class="{{ request()->routeIs('customer.categories') ? 'active' : '' }}">{{ __('Shop') }}</a>
+            <a href="{{ route('customer.categories') }}" class="{{ request()->routeIs('customer.categories') ? 'active' : '' }}">{{ __('Categories') }}</a>
             <a href="{{ route('customer.orders') }}" class="{{ request()->routeIs('customer.orders*') ? 'active' : '' }}">{{ __('Orders') }}</a>
             <a href="{{ route('customer.about') }}" class="{{ request()->routeIs('customer.about') ? 'active' : '' }}">{{ __('About') }}</a>
             <a href="{{ route('customer.contact') }}" class="{{ request()->routeIs('customer.contact') ? 'active' : '' }}">{{ __('Contact') }}</a>
@@ -20,8 +20,15 @@
                     $cartCount += (int) ($it['quantity'] ?? 0);
                 }
             @endphp
-            <div class="user-dropdown">
-                <a href="#" id="userDropdown">
+
+            <a href="{{ route('customer.cart.index') }}" class="cart-link" id="cartIcon">
+                <i class="fas fa-shopping-cart"></i>
+                @if($cartCount > 0)
+                <span class="cart-count">{{ $cartCount }}</span>
+                @endif
+            </a>
+            <div class="user-dropdown user-avatar-wrapper">
+                <a href="#" id="userDropdown" class="user-avatar">
                     <i class="fas fa-user"></i>
                 </a>
                 <div class="dropdown-menu" id="userMenu" style="display: none;">
@@ -56,21 +63,61 @@
                     </form>
                 </div>
             </div>
-            <a href="#"><i class="fas fa-search"></i></a>
-            <a href="#"><i class="fas fa-heart"></i></a>
-            <a href="{{ route('customer.cart.index') }}" class="cart-link">
-                <i class="fas fa-shopping-cart"></i>
-                @if($cartCount > 0)
-                <span class="cart-count">{{ $cartCount }}</span>
-                @endif
-            </a>
         </div>
     </div>
 </header>
 
 <style>
-.user-dropdown {
+.user-dropdown, .user-avatar-wrapper {
     position: relative;
+}
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #B88E2F;
+    color: white !important;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-avatar:hover {
+    background: #A67C00;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    color: white !important;
+}
+
+/* Cart shake animation */
+@keyframes cartShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px) rotate(-5deg); }
+    50% { transform: translateX(5px) rotate(5deg); }
+    75% { transform: translateX(-5px) rotate(-5deg); }
+    100% { transform: translateX(0); }
+}
+
+.cart-shake {
+    animation: cartShake 0.6s ease-in-out;
+}
+
+.cart-link {
+    position: relative;
+    color: #333;
+    text-decoration: none;
+    font-size: 18px;
+    margin-right: 15px;
+    transition: color 0.3s ease;
+}
+
+.cart-link:hover {
+    color: #B88E2F;
 }
 
 .dropdown-menu {
@@ -224,4 +271,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Cart shake animation function
+function shakeCart() {
+    const cartIcon = document.getElementById('cartIcon');
+    if (cartIcon) {
+        cartIcon.classList.add('cart-shake');
+        setTimeout(() => {
+            cartIcon.classList.remove('cart-shake');
+        }, 600);
+    }
+}
+
+// Trigger cart shake when adding items (for AJAX requests)
+window.shakeCart = shakeCart;
 </script>

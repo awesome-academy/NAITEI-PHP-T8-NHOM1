@@ -53,9 +53,9 @@
                 @php
                     $statusClass = match($order->status ?? 'pending') {
                         'pending' => 'status-pending',
-                        'confirmed' => 'status-confirmed', 
-                        'processing' => 'status-processing',
-                        'shipped' => 'status-shipped',
+                        'approved' => 'status-approved',
+                        'rejected' => 'status-rejected',
+                        'delivering' => 'status-delivering',
                         'delivered' => 'status-delivered',
                         'cancelled' => 'status-cancelled',
                         default => 'status-pending'
@@ -147,7 +147,7 @@
         </button>
         @endif
         
-        @if(in_array($order->status, ['pending', 'confirmed']))
+        @if($order->status === 'pending')
         <button class="btn-cancel" onclick="confirmCancel()">
             <i class="fas fa-times"></i>
             {{ __('Cancel Order') }}
@@ -259,19 +259,19 @@
     color: #856404;
 }
 
-.status-confirmed {
+.status-approved {
     background: #d1ecf1;
     color: #0c5460;
 }
 
-.status-processing {
-    background: #d4edda;
-    color: #155724;
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
 }
 
-.status-shipped {
-    background: #cce5ff;
-    color: #004085;
+.status-delivering {
+    background: #fff3cd;
+    color: #856404;
 }
 
 .status-delivered {

@@ -400,7 +400,7 @@ class AdminController extends Controller
     public function updateOrderStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['pending', 'approved', 'rejected', 'delivered', 'cancelled'])],
+            'status' => ['required', Rule::in(['pending', 'approved', 'rejected', 'delivering', 'delivered'])],
         ]);
 
         DB::transaction(function () use ($order, $validated) {

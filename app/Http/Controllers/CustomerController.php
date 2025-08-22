@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends Controller
 {
+    const ORDER_STATUSES_ACTIVE = ['pending', 'approved', 'delivering'];
+    const ORDER_STATUSES_HISTORY = ['rejected', 'cancelled', 'delivered'];
     /**
      * Display the categories page for customers
      */
@@ -158,23 +160,44 @@ class CustomerController extends Controller
     public function orders(Request $request)
     {
         $customer = Auth::user();
+        $tab = $request->get('tab', 'active'); // Default tab is 'active'
         
-        // Get orders with their items and status history
-        $orders = Order::with(['orderItems.product', 'statusOrders'])
-                      ->where('customer_id', $customer->id)
-                      ->orderBy('created_at', 'desc');            
-        $orders = Order::with([
+        // Determine which statuses to include based on tab
+        if ($tab === 'history') {
+            $statuses = self::ORDER_STATUSES_HISTORY;
+        } else {
+            $statuses = self::ORDER_STATUSES_ACTIVE;
+        }
+        
+        // Start with base query
+        $query = Order::with([
             'orderItems.product' => function ($query) {
-                $query->select('product_id', 'name', 'price'); // Add other needed columns here
+                $query->select('product_id', 'name', 'price', 'image');
             },
             'statusOrders'
         ])
         ->where('customer_id', $customer->id)
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
-
+        ->whereIn('status', $statuses)
+        ->orderBy('created_at', 'desc');
         
-        return view('customer.pages.orders', compact('orders'));
+        // Apply status filter if provided
+        if ($request->filled('status') && in_array($request->status, $statuses)) {
+            $query->where('status', $request->status);
+        }
+        
+        // Apply date filters if provided
+        if ($request->filled('date_from')) {
+            $query->whereDate('order_date', '>=', $request->date_from);
+        }
+        
+        if ($request->filled('date_to')) {
+            $query->whereDate('order_date', '<=', $request->date_to);
+        }
+        
+        // Paginate with 8 items per page
+        $orders = $query->paginate(8)->withQueryString();
+        
+        return view('customer.pages.orders', compact('orders', 'tab', 'statuses'));
     }
 
     /**
@@ -212,7 +235,7 @@ class CustomerController extends Controller
         
         // Check if order can be cancelled
 
-        if (!in_array($order->status, ['pending', 'confirmed', 'approved'])) {
+        if ($order->status !== 'pending') {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
