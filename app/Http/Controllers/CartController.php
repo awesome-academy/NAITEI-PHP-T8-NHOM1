@@ -12,17 +12,33 @@ class CartController extends Controller
 	 */
 	public function index(Request $request)
 	{
-		$cart = $request->session()->get('cart', []);
+		$currentCart = $request->session()->get('cart', []);
+		$cart = [];
+		$totalQuantity = 0;
+		$totalPrice = 0.0;
+		$productsInCart = Product::whereIn('product_id', array_keys($currentCart))->get()->keyBy('product_id');
 
-		$totalQuantity = array_sum(array_map(function ($item) {
-			return (int) ($item['quantity'] ?? 0);
-		}, $cart));
+		foreach ($currentCart as $productId => $item) {
+			$product = $productsInCart->get($productId);
 
-		$totalPrice = array_reduce($cart, function ($carry, $item) {
-			$quantity = (int) ($item['quantity'] ?? 0);
-			$price = (float) ($item['price'] ?? 0);
-			return $carry + ($quantity * $price);
-		}, 0.0);
+			if ($product && $product->stock > 0) {
+				$quantity = min($item['quantity'], $product->stock); // Ensure quantity doesn't exceed stock
+				$cart[$productId] = [
+					'product_id' => $productId,
+					'name' => $product->name,
+					'price' => $product->price,
+					'image' => $product->image ?? '/images/default-product.svg',
+					'quantity' => $quantity,
+				];
+				$totalQuantity += $quantity;
+				$totalPrice += $quantity * $product->price;
+			} else {
+				// Optionally, add a flash message for removed/unavailable products
+				session()->flash('warning', __('Some products in your cart are no longer available or out of stock.'));
+			}
+		}
+
+		$request->session()->put('cart', $cart);
 
 		return view('customer.pages.cart', compact('cart', 'totalQuantity', 'totalPrice'));
 	}
@@ -38,19 +54,29 @@ class CartController extends Controller
 
 		$quantityToAdd = max(1, (int) ($validated['quantity'] ?? 1));
 
+		// Check if the product has enough stock
+		// if ($product->stock < $quantityToAdd) {
+		// 	return back()->with('error', __('Not enough stock for this product. Available: :stock', ['stock' => $product->stock]));
+		// }
+
 		$cart = $request->session()->get('cart', []);
-		$productId = $product->getKey();
+		$productId = $product->product_id;
 
 		if (isset($cart[$productId])) {
 			$existingQuantity = (int) ($cart[$productId]['quantity'] ?? 0);
-			$cart[$productId]['quantity'] = $existingQuantity + $quantityToAdd;
+			$newTotalQuantity = $existingQuantity + $quantityToAdd;
+			if ($newTotalQuantity > $product->stock) {
+				return back()->with('error', __('Adding this quantity would exceed available stock. Max allowed: :max', ['max' => $product->stock - $existingQuantity]));
+			}
+			$cart[$productId]['quantity'] = $newTotalQuantity;
 		} else {
 			$cart[$productId] = [
-				'id' => $productId,
+				'product_id' => $productId,
 				'name' => $product->name,
 				'price' => $product->price,
 				'image' => $product->image ?? '/images/default-product.svg',
 				'quantity' => $quantityToAdd,
+				'stock' => $product->stock, // Store stock for immediate checks in cart view
 			];
 		}
 
@@ -70,12 +96,16 @@ class CartController extends Controller
 
 		$newQuantity = (int) $validated['quantity'];
 		$cart = $request->session()->get('cart', []);
-		$productId = $product->getKey();
+		$productId = $product->product_id;
 
 		if ($newQuantity <= 0) {
 			unset($cart[$productId]);
 		} else {
 			if (isset($cart[$productId])) {
+				// Check if the new quantity exceeds the product's current stock
+				if ($newQuantity > $product->stock) {
+					return back()->with('error', __('Quantity cannot exceed available stock. Max available: :stock', ['stock' => $product->stock]));
+				}
 				$cart[$productId]['quantity'] = $newQuantity;
 			}
 		}
