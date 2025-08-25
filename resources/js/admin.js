@@ -1,3 +1,6 @@
+import './bootstrap';
+import NotificationManager from './NotificationManager.js'; // Import the new class
+
 class AdminPanel {
     constructor() {
         this.init();
@@ -468,6 +471,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize image enlargement
     window.imageEnlargement = new ImageEnlargement();
     
+    // Initialize Notification Manager
+    // Ensure window.Laravel and its properties are available
+    if (window.Laravel && window.Laravel.adminId !== 'null') {
+        window.notificationManager = new NotificationManager(window.Laravel.adminId);
+    }
+
     // Make loadWeeklyCharts available globally immediately
     window.loadWeeklyCharts = loadWeeklyCharts;
 });
