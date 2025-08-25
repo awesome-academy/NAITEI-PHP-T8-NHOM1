@@ -56,7 +56,7 @@
                     <img src="{{ isset($item['image']) ? asset($item['image']) : asset('images/default-product.svg') }}" alt="{{ $item['name'] }}">
                     <div class="info">
                         <div class="name">{{ $item['name'] }}</div>
-                        <div class="sku">#{{ $item['id'] }}</div>
+                        <div class="sku">#{{ $item['product_id'] }}</div>
                     </div>
                 </div>
                 <div class="col-price">{{ number_format($item['price'], 0, '.', ',') }} {{ __('VND') }}</div>

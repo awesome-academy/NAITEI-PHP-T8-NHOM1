@@ -19,6 +19,12 @@
 @if(session('success'))
 	<div class="alert-success">{{ session('success') }}</div>
 @endif
+@if(session('warning'))
+	<div class="alert-warning">{{ session('warning') }}</div>
+@endif
+@if(session('error'))
+	<div class="alert-error">{{ session('error') }}</div>
+@endif
 
 <div class="cart-wrapper">
 	<div class="cart-main">
@@ -43,12 +49,12 @@
 							<img src="{{ asset($item['image'] ?? 'images/default-product.svg') }}" alt="{{ $item['name'] }}">
 							<div class="info">
 								<div class="name">{{ $item['name'] }}</div>
-								<div class="sku">#{{ $item['id'] }}</div>
+								<div class="sku">#{{ $item['product_id'] }}</div>
 							</div>
 						</div>
 						<div class="col-price">{{ number_format($item['price'], 0, '.', ',') }} {{ __('VND') }}</div>
 						<div class="col-quantity">
-							<form action="{{ route('customer.cart.update', ['product' => $item['id']]) }}" method="POST" class="qty-form">
+							<form action="{{ route('customer.cart.update', ['product' => $item['product_id']]) }}" method="POST" class="qty-form">
 								@csrf
 								<input type="number" name="quantity" min="0" value="{{ $item['quantity'] }}">
 								<button type="submit" class="btn-ghost">{{ __('Update') }}</button>
@@ -56,7 +62,7 @@
 						</div>
 						<div class="col-subtotal">{{ number_format($item['price'] * $item['quantity'], 0, '.', ',') }} {{ __('VND') }}</div>
 						<div class="col-action">
-							<form action="{{ route('customer.cart.remove', ['product' => $item['id']]) }}" method="POST">
+							<form action="{{ route('customer.cart.remove', ['product' => $item['product_id']]) }}" method="POST">
 								@csrf
 								@method('DELETE')
 								<button type="submit" class="btn-icon" title="{{ __('Remove') }}">
@@ -104,6 +110,22 @@
 	background: #ecfdf5;
 	color: #065f46;
 	border: 1px solid #a7f3d0;
+	padding: 12px 16px;
+	border-radius: 6px;
+	margin-bottom: 16px;
+}
+.alert-warning {
+	background: #fffbeb;
+	color: #967b1f;
+	border: 1px solid #fde68a;
+	padding: 12px 16px;
+	border-radius: 6px;
+	margin-bottom: 16px;
+}
+.alert-error {
+	background: #fef3f2;
+	color: #991b1b;
+	border: 1px solid #fca5a5;
 	padding: 12px 16px;
 	border-radius: 6px;
 	margin-bottom: 16px;
