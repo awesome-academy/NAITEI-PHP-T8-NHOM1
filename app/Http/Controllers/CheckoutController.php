@@ -7,6 +7,8 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\NewOrderPlaced;
+use Illuminate\Support\Facades\Redis;
 
 class CheckoutController extends Controller
 {
@@ -103,6 +105,12 @@ class CheckoutController extends Controller
 
             // Clear cart
             $request->session()->forget('cart');
+
+            // Eager load the user relationship before dispatching the event
+            $order->load('user');
+
+            // Dispatch the event after the order is successfully created
+            event(new NewOrderPlaced($order));
         });
 
         return redirect()->route('customer.orders')->with('success', __('Order placed successfully.'));

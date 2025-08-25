@@ -9,6 +9,7 @@ use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,13 @@ Route::prefix('admin')->name('admin.')->middleware(['admin', 'check.user.activat
     Route::get('/feedbacks', [AdminController::class, 'feedbacks'])->name('feedbacks');
     Route::get('/feedbacks/{feedback}', [AdminController::class, 'showFeedback'])->name('feedbacks.show');
     Route::delete('/feedbacks/{feedback}', [AdminController::class, 'deleteFeedback'])->name('feedbacks.delete');
+
+    // Notification Routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('notifications.count');
+    Route::get('/notifications/recent', [NotificationController::class, 'getRecent'])->name('notifications.recent');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });
 
 Route::get('language/{lang}', [LanguageController::class, 'changeLanguage'])->name('locale');

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Notification;
 
 
 class User extends Authenticatable
@@ -80,6 +81,11 @@ class User extends Authenticatable
     public function statusOrders(): HasMany
     {
         return $this->hasMany(StatusOrder::class, 'admin_id');
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id');
     }
 
 }

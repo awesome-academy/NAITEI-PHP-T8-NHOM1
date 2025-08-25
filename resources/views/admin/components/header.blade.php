@@ -2,6 +2,21 @@
 <header class="header">
     <h1 id="page-title">{{ __('Dashboard') }}</h1>
     <div class="header-actions">
+        {{-- Notification Dropdown --}}
+        <div class="notification-dropdown">
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count">0</span>
+            </div>                                                                                                                                                                                                                                                                                                                                                              
+            <div class="dropdown-menu notification-list">
+                <!-- Notifications will be loaded here by JavaScript -->
+                <div class="dropdown-item no-notifications">
+                    {{ __('No new notifications') }}
+                </div>
+            </div>
+        </div>
+
+        {{-- User Dropdown --}}
         <div class="user-dropdown">
             <div class="user-avatar">
                 <i class="fas fa-user"></i>
