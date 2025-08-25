@@ -17,3 +17,4 @@ yarn-error.log
 /.vscode
 /.docker
 .phpunit.result.cache
+/public/build/manifest.json

@@ -34,4 +34,22 @@ class StoreUserRequest extends FormRequest
             ],
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.unique' => __('This email address is already registered in the system. Please use a different email address.'),
+            'email.required' => __('Email address is required.'),
+            'email.email' => __('Please enter a valid email address.'),
+            'name.required' => __('Username is required.'),
+            'password.required' => __('Password is required.'),
+            'password.min' => __('Password must be at least 8 characters long.'),
+            'role_id.required' => __('Please select a role for the user.'),
+        ];
+    }
 }

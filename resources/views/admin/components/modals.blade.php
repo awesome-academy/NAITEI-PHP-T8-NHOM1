@@ -468,3 +468,37 @@
         </div>
     </div>
 </div>
+
+<!-- Order Status Warning Modal -->
+<div class="modal" id="orderStatusWarningModal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3 style="color: #dc3545;">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ __('Status Change Warning') }}
+            </h3>
+            <button class="modal-close" onclick="adminPanel.closeModal('orderStatusWarningModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="padding: 20px 0;">
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #856404; font-weight: 500;">
+                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                        {{ __('Once you change the status to "Delivered" or "Cancelled", you will not be able to change it again.') }}
+                    </p>
+                </div>
+                <p style="margin: 10px 0; color: #333;">
+                    {{ __('Are you sure you want to continue with this status change?') }}
+                </p>
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+            <button type="button" class="btn btn-secondary" onclick="adminPanel.closeModal('orderStatusWarningModal')">
+                {{ __('Cancel') }}
+            </button>
+            <button type="button" class="btn btn-warning" id="confirmStatusChangeBtn">
+                {{ __('Continue') }}
+            </button>
+        </div>
+    </div>
+</div>

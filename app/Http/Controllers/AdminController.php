@@ -62,6 +62,7 @@ class AdminController extends Controller
         $orderedProducts = [];
         $newOrders = [];
         $newFeedbacks = [];
+        $dailyRevenue = [];
 
         // get data for the last 7 days
         for ($i = 6; $i >= 0; $i--) {
@@ -94,6 +95,18 @@ class AdminController extends Controller
             // the number of new feedbacks in the day
             $newFeedbackCount = Feedback::whereDate('created_at', $dateString)->count();
             $newFeedbacks[] = $newFeedbackCount;
+            
+            // daily revenue from delivered orders
+            $revenue = Order::where('status', 'delivered')
+                ->where(function($query) use ($dateString) {
+                    $query->whereDate('updated_at', $dateString)
+                          ->orWhere(function($subQuery) use ($dateString) {
+                              $subQuery->whereDate('created_at', $dateString)
+                                       ->where('status', 'delivered');
+                          });
+                })
+                ->sum('total_cost');
+            $dailyRevenue[] = (float) $revenue;
         }
 
         return response()->json([
@@ -101,7 +114,8 @@ class AdminController extends Controller
             'activeUsers' => $activeUsers,
             'orderedProducts' => $orderedProducts,
             'newOrders' => $newOrders,
-            'newFeedbacks' => $newFeedbacks
+            'newFeedbacks' => $newFeedbacks,
+            'dailyRevenue' => $dailyRevenue
         ]);
     }
 
@@ -114,6 +128,11 @@ class AdminController extends Controller
 
     public function storeUser(StoreUserRequest $request)
     {
+        // only super admin can create users
+        if (auth()->user()->email !== Role::SUPER_ADMIN) {
+            return redirect()->route('admin.users')->with('error', 'Only the super admin can create new users.');
+        }
+
         $validated = $request->validated();
         
         if (isset($validated['password'])) {
@@ -125,6 +144,16 @@ class AdminController extends Controller
 
     public function updateUser(UpdateUserRequest $request, User $user)
     {
+        // only super admin can update users
+        if (auth()->user()->email !== Role::SUPER_ADMIN) {
+            return redirect()->route('admin.users')->with('error', 'Only the super admin can edit users.');
+        }
+
+        // super admin cannot edit their own account
+        if ($user->id === auth()->id()) {
+            return redirect()->route('admin.users')->with('error', 'You cannot edit your own account.');
+        }
+
         $validated = $request->validated();
         $user->update($validated);
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
@@ -132,6 +161,14 @@ class AdminController extends Controller
 
     public function deleteUser(User $user)
     {
+        // only super admin can delete users
+        if (auth()->user()->email !== Role::SUPER_ADMIN) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the super admin can delete users.'
+            ], 403);
+        }
+
         // Prevent deletion of current logged in user
         if ($user->id === auth()->id()) {
             return response()->json([
@@ -403,22 +440,40 @@ class AdminController extends Controller
             'status' => ['required', Rule::in(['pending', 'approved', 'rejected', 'delivering', 'delivered'])],
         ]);
 
+        // check if the order is already in a final state (delivered or cancelled)
+        if (in_array($order->status, ['delivered', 'cancelled'])) {
+            return redirect()->route('admin.orders')->with('error', __('Cannot change status of delivered or cancelled orders.'));
+        }
+
         DB::transaction(function () use ($order, $validated) {
             $oldStatus = $order->status;
-            if ($oldStatus === $validated['status']) {
+            $newStatus = $validated['status'];
+            
+            if ($oldStatus === $newStatus) {
                 return; // No change
             }
-            $order->update(['status' => $validated['status']]);
+            
+            $order->update(['status' => $newStatus]);
 
             StatusOrder::create([
-                'action_type' => $validated['status'],
+                'action_type' => $newStatus,
                 'date' => now(),
                 'admin_id' => auth()->id(),
                 'order_id' => $order->getKey(),
             ]);
         });
 
-        return redirect()->route('admin.orders')->with('success', __('Order status updated.'));
+        $statusMessage = match($validated['status']) {
+            'pending' => __('Order status changed to Pending'),
+            'approved' => __('Order has been approved'),
+            'rejected' => __('Order has been rejected'),
+            'delivering' => __('Order is now being delivered'),
+            'delivered' => __('Order has been marked as delivered'),
+            'cancelled' => __('Order has been cancelled'),
+            default => __('Order status updated')
+        };
+
+        return redirect()->route('admin.orders')->with('success', $statusMessage);
     }
 
     public function showOrderDetails(Order $order)
@@ -441,19 +496,19 @@ class AdminController extends Controller
 
     public function toggleUserActivation(User $user)
     {
+        // only super admin can toggle user activation
+        if (auth()->user()->email !== Role::SUPER_ADMIN) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the super admin can activate/deactivate users.'
+            ], 403);
+        }
+
         // if the user is the currently logged in user, prevent deactivation
         if ($user->id === auth()->id()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cannot deactivate your own account.'
-            ], 403);
-        }
-
-        // only allow super admin to toggle other admins
-        if ($user->role_id == ROLE::ADMIN && auth()->user()->email !== 'admin1@gmail.com') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only the super admin can deactivate other admin accounts.'
             ], 403);
         }
 
