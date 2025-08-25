@@ -5,9 +5,15 @@
     <div class="table-container">
         <div class="table-header">
             <h2 class="table-title">{{ __('Users Management') }}</h2>
-            <button class="btn btn-primary" data-modal="userModal" type="button">
-                <i class="fas fa-plus"></i> {{ __('Add User') }}
-            </button>
+            @if(auth()->user()->email === 'admin1@gmail.com')
+                <button class="btn btn-primary" data-modal="userModal" type="button">
+                    <i class="fas fa-plus"></i> {{ __('Add User') }}
+                </button>
+            @else
+                <span class="text-muted" style="font-style: italic; color: #6c757d;">
+                    {{ __('View Only - Contact Super Admin for Changes') }}
+                </span>
+            @endif
         </div>
         <div style="padding: 20px;">
 
@@ -47,55 +53,61 @@
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->role->name ? __($user->role->name) : __('N/A') }}</td>
                         <td>
-                            @if($user->id !== auth()->id())
-                                {{-- only super admin can toggle other admins --}}
-                                @if(($user->role_id == 1 && auth()->user()->email === 'admin1@gmail.com') || $user->role_id != 1)
-                                    @if($user->is_activate ?? true)
-                                        <span class="status-badge status-active toggle-status-btn" 
-                                              data-id="{{ $user->id }}" 
-                                              data-status="1"
-                                              title="Click to deactivate">
-                                            <i class="fas fa-check-circle"></i> {{ __('Active') }}
-                                        </span>
-                                    @else
-                                        <span class="status-badge status-inactive toggle-status-btn" 
-                                              data-id="{{ $user->id }}" 
-                                              data-status="0"
-                                              title="Click to activate">
-                                            <i class="fas fa-times-circle"></i> {{ __('Inactive') }}
-                                        </span>
-                                    @endif
+                            @if($user->id !== auth()->id() && auth()->user()->email === 'admin1@gmail.com')
+                                {{-- only super admin can toggle other users --}}
+                                @if($user->is_activate ?? true)
+                                    <span class="status-badge user-status-badge status-active toggle-status-btn" 
+                                          data-id="{{ $user->id }}" 
+                                          data-status="1"
+                                          title="Click to deactivate">
+                                        <i class="fas fa-check-circle"></i> {{ __('Active') }}
+                                    </span>
                                 @else
-                                    {{-- other admin cant toggle --}}
-                                    @if($user->is_activate ?? true)
-                                        <span class="status-badge status-active"><i class="fas fa-check-circle"></i> {{ __('Active') }}</span>
-                                    @else
-                                        <span class="status-badge status-inactive"><i class="fas fa-times-circle"></i> {{ __('Inactive') }}</span>
-                                    @endif
+                                    <span class="status-badge user-status-badge status-inactive toggle-status-btn" 
+                                          data-id="{{ $user->id }}" 
+                                          data-status="0"
+                                          title="Click to activate">
+                                        <i class="fas fa-times-circle"></i> {{ __('Inactive') }}
+                                    </span>
                                 @endif
                             @else
+                                {{-- non-super admin or own account - view only --}}
                                 @if($user->is_activate ?? true)
-                                    <span class="status-badge status-active"><i class="fas fa-check-circle"></i> {{ __('Active') }}</span>
+                                    <span class="status-badge user-status-badge status-active"><i class="fas fa-check-circle"></i> {{ __('Active') }}</span>
                                 @else
-                                    <span class="status-badge status-inactive"><i class="fas fa-times-circle"></i> {{ __('Inactive') }}</span>
+                                    <span class="status-badge user-status-badge status-inactive"><i class="fas fa-times-circle"></i> {{ __('Inactive') }}</span>
                                 @endif
                             @endif
                         </td>
                         <td>
-                            <button class="btn btn-warning btn-sm edit-btn"
-                                    data-id="{{ $user->id }}"
-                                    data-name="{{ $user->name }}"
-                                    data-email="{{ $user->email }}"
-                                    data-role-id="{{ $user->role_id}}"
-                                    data-is-activate="{{ $user->is_activate ?? 1 }}"
-                                    >
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            
-                            @if($user->id !== auth()->id() && !($user->is_activate ?? 1))
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="{{ $user->id }}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            @if(auth()->user()->email === 'admin1@gmail.com')
+                                {{-- only super admin can edit all users except themselves --}}
+                                @if($user->id !== auth()->id())
+                                    <button class="btn btn-warning btn-sm edit-btn"
+                                            data-id="{{ $user->id }}"
+                                            data-name="{{ $user->name }}"
+                                            data-email="{{ $user->email }}"
+                                            data-role-id="{{ $user->role_id}}"
+                                            data-is-activate="{{ $user->is_activate ?? 1 }}"
+                                            >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    
+                                    @if(!($user->is_activate ?? 1))
+                                        <button class="btn btn-danger btn-sm delete-btn" data-id="{{ $user->id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    @endif
+                                @else
+                                    <span class="text-muted" style="font-style: italic; font-size: 12px;">
+                                        {{ __('Own Account') }}
+                                    </span>
+                                @endif
+                            @else
+                                {{-- regular admin - view only --}}
+                                <span class="text-muted" style="font-style: italic; font-size: 12px;">
+                                    {{ __('View Only') }}
+                                </span>
                             @endif
                         </td>
                     </tr>
@@ -118,7 +130,56 @@
 
 @section('scripts')
 <script>
+    const translations = {
+        success: "{{ __('Success!') }}",
+        error: "{{ __('Error!') }}",
+    };
+
+    // show custom notification
+    function showNotification(message, type = 'error') {
+        const existingNotifications = document.querySelectorAll('.custom-notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `custom-notification ${type}`;
+        notification.innerHTML = `
+            <div style="padding: 15px 20px; margin: 20px; border-radius: 5px; position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); color: white; ${type === 'error' ? 'background-color: #dc3545;' : type === 'success' ? 'background-color: #28a745;' : 'background-color: #007bff;'}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1; margin-right: 10px;">
+                        <strong>${type === 'error' ? translations.error : type === 'success' ? translations.success : 'Info'}:</strong><br>
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
+        @if ($errors->any())
+            let errorMessages = [];
+            @foreach ($errors->all() as $error)
+                errorMessages.push("{{ $error }}");
+            @endforeach
+            showNotification(errorMessages.join('\n'), 'error');
+        @endif
+
+        // check for success/error messages
+        @if (session('success'))
+            showNotification("{{ session('success') }}", 'success');
+        @endif
+
+        @if (session('error'))
+            showNotification("{{ session('error') }}", 'error');
+        @endif
+
         document.getElementById('searchInput').addEventListener('keypress', function() {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -173,7 +234,7 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success) {
-                            button.innerHTML = '<i class="fas fa-check"></i> Success!';
+                            button.innerHTML = '<i class="fas fa-check"></i> ' + translations.success;
                             button.classList.add(data.is_activate ? 'status-active' : 'status-inactive');
                             button.classList.remove(data.is_activate ? 'status-inactive' : 'status-active');
                             

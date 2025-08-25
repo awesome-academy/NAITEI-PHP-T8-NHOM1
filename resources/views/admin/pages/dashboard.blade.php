@@ -83,6 +83,14 @@
         <div class="charts-grid">
             <div class="chart-container">
                 <div class="chart-header">
+                    <h3>{{ __('Daily Revenue') }}</h3>
+                    <p class="chart-subtitle">{{ __('Revenue from delivered orders in the last 7 days') }}</p>
+                </div>
+                <canvas id="dailyRevenueChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
                     <h3>{{ __('Active Users') }}</h3>
                     <p class="chart-subtitle">{{ __('Users who placed orders or gave feedback') }}</p>
                 </div>

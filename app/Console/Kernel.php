@@ -12,7 +12,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // send daily revenue report at 23:59 every day
+        $schedule->command('report:daily-revenue')
+                //->everyMinute() // log test
+                ->dailyAt('23:59')
+                ->withoutOverlapping()
+                ->timezone('Asia/Ho_Chi_Minh')
+                ->emailOutputOnFailure('longpham19112004@gmail.com') // take the error message and send it to this email
+                ->sendOutputTo(storage_path('logs/daily_revenue.log')); // log file for daily revenue report
+        
+        // $schedule->command('inspire')->everyMinute()
+        //         ->sendOutputTo(storage_path('logs/cronjob.log')); // cronjob log test
     }
 
     /**

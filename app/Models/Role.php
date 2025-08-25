@@ -17,6 +17,7 @@ class Role extends Model
 
     public const ADMIN = 1;
     public const CUSTOMER = 2;
+    public const SUPER_ADMIN = 'admin1@gmail.com';
 
     public function users(): HasMany
     {

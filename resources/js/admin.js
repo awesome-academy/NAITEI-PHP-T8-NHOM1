@@ -22,6 +22,7 @@ class AdminPanel {
         })
             .then(response => response.ok ? response.json() : Promise.reject('API Error'))
             .then(data => {
+                this.renderDailyRevenueChart(data);
                 this.renderActiveUsersChart(data);
                 this.renderOrderedProductsChart(data);
                 this.renderNewOrdersChart(data);
@@ -138,6 +139,118 @@ class AdminPanel {
         });
     }
 
+    renderDailyRevenueChart(data) {
+        const ctx = document.getElementById('dailyRevenueChart');
+        if (!ctx) return;
+
+        const maxRevenue = Math.max(...data.dailyRevenue);
+        const revenueLabels = data.dailyRevenue.map(revenue => {
+            if (revenue >= 1000000) {
+                return (revenue / 1000000).toFixed(1) + 'M';
+            } else if (revenue >= 1000) {
+                return (revenue / 1000).toFixed(0) + 'K';
+            }
+            return revenue.toLocaleString();
+        });
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.days,
+                datasets: [{
+                    label: 'Daily Revenue (VNĐ)',
+                    data: data.dailyRevenue,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#28a745',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    gradient: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#495057',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#28a745',
+                        borderWidth: 2,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(context) {
+                                return 'Date: ' + context[0].label;
+                            },
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                return 'Revenue: ' + value.toLocaleString() + ' VNĐ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: '#6c757d',
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                if (value >= 1000000) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return (value / 1000).toFixed(0) + 'K';
+                                }
+                                return value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     getChartOptions() {
         return {
             responsive: true,
@@ -185,7 +298,7 @@ class AdminPanel {
     }
 
     showChartError() {
-        const chartContainers = ['activeUsersChart', 'orderedProductsChart', 'newOrdersChart', 'newFeedbacksChart'];
+        const chartContainers = ['activeUsersChart', 'orderedProductsChart', 'newOrdersChart', 'newFeedbacksChart', 'dailyRevenueChart'];
         chartContainers.forEach(containerId => {
             const container = document.getElementById(containerId);
             if (container) {
@@ -242,6 +355,9 @@ class AdminPanel {
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', this.handleFormSubmit.bind(this));
         });
+
+        // Initialize order status handlers
+        this.initOrderStatusHandlers();
 
         // Auto-update stats every 30 seconds
         setInterval(() => this.updateStats(), 30000);
@@ -333,6 +449,47 @@ class AdminPanel {
         // Logout method implementation
     }
 
+    handleOrderStatusChange(form) {
+        const submitButton = form.querySelector('.order-status-submit');
+        const statusSelect = form.querySelector('.order-status-select');
+        const currentStatus = form.getAttribute('data-current-status');
+        
+        if (!submitButton || !statusSelect) return;
+
+        if (submitButton.disabled) return;
+
+        submitButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const newStatus = statusSelect.value;
+            
+            // check if new status is final and show warning
+            if (['delivered', 'cancelled'].includes(newStatus) && newStatus !== currentStatus) {
+                this.showOrderStatusWarning(form);
+                return;
+            }
+            
+            form.submit();
+        });
+    }
+
+    showOrderStatusWarning(form) {
+        this.openModal('orderStatusWarningModal');
+        
+        const confirmBtn = document.getElementById('confirmStatusChangeBtn');
+        if (confirmBtn) {
+            confirmBtn.onclick = () => {
+                this.closeModal('orderStatusWarningModal');
+                form.submit();
+            };
+        }
+    }
+
+    initOrderStatusHandlers() {
+        document.querySelectorAll('.order-status-form').forEach(form => {
+            this.handleOrderStatusChange(form);
+        });
+    }
 }
 
 // Language selector function

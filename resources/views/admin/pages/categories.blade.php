@@ -35,7 +35,7 @@
                         <td>{{ __($category->name) }}</td>
                         <td>{{ $category->products_count }} {{ __('products') }}</td>
                         <td>{{ $category->created_at ? $category->created_at->format('d/m/Y') : __('N/A') }}</td>
-                        <td><span class="status-badge status-active">{{ __('Active') }}</span></td>
+                        <td><span class="status-badge category-status-badge status-active">{{ __('Active') }}</span></td>
                         <td>
                             <button class="btn btn-warning btn-sm edit-btn"
                                     data-id="{{ $category->category_id }}"

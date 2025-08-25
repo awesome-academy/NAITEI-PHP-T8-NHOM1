@@ -279,6 +279,11 @@
     color: #155724;
 }
 
+.status-delivering {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
 .status-cancelled {
     background: #f8d7da;
     color: #721c24;

@@ -2,6 +2,38 @@
 
 @section('content')
 <div class="content-section active">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 0 20px 20px 20px;">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 0 20px 20px 20px;">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 0 20px 20px 20px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <ul style="margin: 0; padding-left: 20px;">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    @endif
+
     <div class="table-container">
         <div class="table-header">
             <h2 class="table-title">{{ __('Order Management') }}</h2>
@@ -97,20 +129,22 @@
                                 $statusClass = $statusClasses[$status] ?? 'status-pending';
                                 $statusText = $statusTexts[$status] ?? __('Pending');
                             @endphp
-                            <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
+                            <span class="status-badge order-status-badge {{ $statusClass }}">{{ $statusText }}</span>
                         </td>
                         <td>
-                            <form action="{{ route('admin.orders.status.update', $order->order_id) }}" method="POST" style="display:inline-flex; gap:8px; align-items:center;">
+                            <form action="{{ route('admin.orders.status.update', $order->order_id) }}" method="POST" style="display:inline-flex; gap:8px; align-items:center;" class="order-status-form" data-current-status="{{ $status }}">
                                 @csrf
                                 @method('PATCH')
-                                <select name="status" class="form-control" style="width:auto;">
+                                <select name="status" class="form-control order-status-select" style="width:auto;" 
+                                        {{ in_array($status, ['delivered', 'cancelled']) ? 'disabled' : '' }}>
                                     <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
                                     <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>{{ __('Approve') }}</option>
                                     <option value="rejected" {{ $status==='rejected' ? 'selected' : '' }}>{{ __('Reject') }}</option>
                                     <option value="delivering" {{ $status==='delivering' ? 'selected' : '' }}>{{ __('Delivering') }}</option>
                                     <option value="delivered" {{ $status==='delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
                                 </select>
-                                <button type="submit" class="btn btn-success btn-sm">
+                                <button type="submit" class="btn btn-success btn-sm order-status-submit" 
+                                        {{ in_array($status, ['delivered', 'cancelled']) ? 'disabled' : '' }}>
                                     <i class="fas fa-save"></i> {{ __('Update') }}
                                 </button>
                             </form>
@@ -324,6 +358,66 @@
                 });
             });
         });
+
+        // handle order status form submissions
+        document.querySelectorAll('.order-status-form').forEach(form => {
+            const submitButton = form.querySelector('.order-status-submit');
+            const statusSelect = form.querySelector('.order-status-select');
+            const currentStatus = form.getAttribute('data-current-status');
+            
+            if (submitButton) {
+                submitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const newStatus = statusSelect.value;
+                    
+                    if (['delivered', 'cancelled'].includes(currentStatus)) {
+                        adminPanel.openModal('orderStatusErrorModal');
+                        return;
+                    }
+                    
+                    // check if new status is final and show warning
+                    if (['delivered', 'cancelled'].includes(newStatus) && newStatus !== currentStatus) {
+                        adminPanel.openModal('orderStatusWarningModal');
+                        
+                        const confirmBtn = document.getElementById('confirmStatusChangeBtn');
+                        confirmBtn.onclick = function() {
+                            adminPanel.closeModal('orderStatusWarningModal');
+                            form.submit();
+                        };
+                        return;
+                    }
+                    
+                    form.submit();
+                });
+            }
+        });
+
+        function initAlerts() {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.classList.add('auto-hide');
+                
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 5000);
+            });
+
+            document.querySelectorAll('.alert .btn-close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    const alert = this.closest('.alert');
+                    alert.style.animation = 'slideOutUp 0.3s ease';
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.remove();
+                        }
+                    }, 300);
+                });
+            });
+        }
+
+        initAlerts();
     });
 </script>
 @endsection
