@@ -245,6 +245,8 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 20px 0;
 }
 
 .filter-left {
@@ -256,7 +258,7 @@
 
 .search-form {
     flex: 1;
-    max-width: 400px;
+    max-width: 350px;
 }
 
 .search-box {
@@ -268,6 +270,7 @@
     border-radius: 8px;
     padding: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 48px;
 }
 
 .search-icon {
@@ -281,9 +284,11 @@
     flex: 1;
     border: none;
     outline: none;
-    padding: 12px 15px 12px 40px;
+    padding: 0 15px 0 40px;
     font-size: 14px;
     border-radius: 8px 0 0 8px;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .search-input::placeholder {
@@ -294,11 +299,13 @@
     background: #B88E2F;
     color: white;
     border: none;
-    padding: 12px 20px;
+    padding: 0 24px;
     border-radius: 0 8px 8px 0;
     cursor: pointer;
     font-weight: 500;
     transition: background 0.3s;
+    height: 100%;
+    min-width: 85px;
 }
 
 .search-btn:hover {
